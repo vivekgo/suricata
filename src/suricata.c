@@ -114,6 +114,7 @@
 #include "flow-var.h"
 #include "flow-bit.h"
 #include "pkt-var.h"
+#include "global-var.h"
 
 #include "host.h"
 #include "unix-manager.h"
@@ -1863,6 +1864,7 @@ int main(int argc, char **argv)
 
     /* Initialize the configuration module. */
     ConfInit();
+    GlobalVarInit();
 
     if (ParseCommandLine(argc, argv, &suri) != TM_ECODE_OK) {
         exit(EXIT_FAILURE);
@@ -2290,6 +2292,6 @@ int main(int argc, char **argv)
         MpmCudaBufferDeSetup();
     CudaHandlerFreeProfiles();
 #endif
-
+    GlobalVarFree();
     exit(engine_retval);
 }

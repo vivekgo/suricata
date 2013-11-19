@@ -68,6 +68,7 @@
 #include "suricata-common.h"
 #include "packet-queue.h"
 #include "data-queue.h"
+#include "global-var.h"
 
 /* the name of our binary */
 #define PROG_NAME "Suricata"

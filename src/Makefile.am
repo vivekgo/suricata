@@ -199,6 +199,7 @@ flow-storage.c flow-storage.h \
 flow-timeout.c flow-timeout.h \
 flow-util.c flow-util.h \
 flow-var.c flow-var.h \
+global-var.c global-var.h \
 host.c host.h \
 host-queue.c host-queue.h \
 host-storage.c host-storage.h \
