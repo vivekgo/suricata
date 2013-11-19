@@ -397,7 +397,7 @@ int LuajitSetGlobalStrvar(lua_State *luastate) {
 
 //Vivek - LuajitGetGlobalIntvar
 
-static int LuajitGetFlowint(lua_State *luastate) {
+static int LuajitGetGlobalIntvar(lua_State *luastate) {
     // uint16_t idx;
     int id;
     // Flow *f;
