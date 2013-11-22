@@ -205,7 +205,7 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
     memset(buf, 0x00, buflen);
 
     memcpy(buf, globalstrvar, var_len);
-//    buf[var_len] = '\0';
+    buf[var_len] = '\0';
 
 /*
     if (need_flow_lock)
