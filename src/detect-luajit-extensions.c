@@ -123,6 +123,12 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
     }
     char* globalstrvar = GlobalStrGet(id);
     
+    if(globalstrvar == NULL) {
+       lua_pushnil(luastate);
+       lua_pushstring(luastate, "global string var uninitialized");
+       return 2;
+    }
+    
     if(!strcmp(globalstrvar,"null")) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "global string var uninitialized");
