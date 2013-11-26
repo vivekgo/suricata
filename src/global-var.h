@@ -52,9 +52,10 @@ int GlobalIntSet(int,int);
 int GlobalIntGet(int);
 int GlobalStrSet(int,char*);
 char* GlobalStrGet(int);
+void GlobalStrFree(int);
 void GlobalVarFree();
 
-#endif __GLOBAL_VAR_H__
+#endif
 
 /**
 // Struct used to hold the string data type for globalvars *

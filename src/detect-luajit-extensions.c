@@ -69,6 +69,40 @@ static const char luaext_key_det_ctx[] = "suricata:det_ctx";
 static const char luaext_key_flow[] = "suricata:flow";
 static const char luaext_key_need_flow_lock[] = "suricata:need_flow_lock";
 
+//Vivek - FreeGlobalStrvar
+
+static void LuajitFreeGlobalStrvar(lua_State *luastate) {
+    int id;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    /* need flowvar idx */
+    if (!lua_isnumber(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a number");
+        return 2;
+    }
+    id = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALSTRVARS) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "global var id out of range");
+        return 2;
+    }
+    GlobalStrFree(id);
+}
+
+
+
 
 //Vivek - GetGlobalStrvar
 
@@ -122,6 +156,12 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         return 2;
     }
     char* globalstrvar = GlobalStrGet(id);
+    
+    if(globalstrvar == NULL) {
+       lua_pushnil(luastate);
+       lua_pushstring(luastate, "global string var uninitialized");
+       return 2;
+    }
     
     if(!strcmp(globalstrvar,"null")) {
         lua_pushnil(luastate);
@@ -398,7 +438,7 @@ int LuajitSetGlobalStrvar(lua_State *luastate) {
 
 //Vivek - LuajitGetGlobalIntvar
 
-static int LuajitGetFlowint(lua_State *luastate) {
+static int LuajitGetGlobalIntvar(lua_State *luastate) {
     // uint16_t idx;
     int id;
     // Flow *f;
@@ -1095,6 +1135,11 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitSetGlobalIntvar);
     lua_setglobal(lua_state, "ScGlobalIntSet");
+    
+    lua_pushcfunction(lua_state, LuajitFreeGlobalStrvar);
+    lua_setglobal(lua_state, "ScGlobalStrFree");
+    
+    
 
     return 0;
 }

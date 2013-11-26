@@ -86,6 +86,11 @@ int GlobalStrSet(int idx, char* value) {
         return 0;
 }
 
+void GlobalStrFree(int idx) {
+    free(globalStr[idx]);
+    globalStr[idx] = NULL;
+}
+
 /**
  // puts a new value into a globalvar 
 static void GlobalVarUpdateStr(GlobalVar *gbv, uint8_t *value, uint16_t size) {
