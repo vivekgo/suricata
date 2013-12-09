@@ -123,24 +123,25 @@ static pthread_mutex_t luajit_states_lock = SCMUTEX_INITIALIZER;
 
 #define DATATYPE_PACKET                     (1<<0)
 #define DATATYPE_PAYLOAD                    (1<<1)
-#define DATATYPE_STREAM                     (1<<2)
+#define DATATYPE_PAYLOAD_WITH_IP            (1<<2)
+#define DATATYPE_STREAM                     (1<<3)
 
-#define DATATYPE_HTTP_URI                   (1<<3)
-#define DATATYPE_HTTP_URI_RAW               (1<<4)
+#define DATATYPE_HTTP_URI                   (1<<4)
+#define DATATYPE_HTTP_URI_RAW               (1<<5)
 
-#define DATATYPE_HTTP_REQUEST_HEADERS       (1<<5)
-#define DATATYPE_HTTP_REQUEST_HEADERS_RAW   (1<<6)
-#define DATATYPE_HTTP_REQUEST_COOKIE        (1<<7)
-#define DATATYPE_HTTP_REQUEST_UA            (1<<8)
+#define DATATYPE_HTTP_REQUEST_HEADERS       (1<<6)
+#define DATATYPE_HTTP_REQUEST_HEADERS_RAW   (1<<7)
+#define DATATYPE_HTTP_REQUEST_COOKIE        (1<<8)
+#define DATATYPE_HTTP_REQUEST_UA            (1<<9)
 
-#define DATATYPE_HTTP_REQUEST_LINE          (1<<9)
-#define DATATYPE_HTTP_REQUEST_BODY          (1<<10)
+#define DATATYPE_HTTP_REQUEST_LINE          (1<<10)
+#define DATATYPE_HTTP_REQUEST_BODY          (1<<11)
 
-#define DATATYPE_HTTP_RESPONSE_COOKIE       (1<<11)
-#define DATATYPE_HTTP_RESPONSE_BODY         (1<<12)
+#define DATATYPE_HTTP_RESPONSE_COOKIE       (1<<12)
+#define DATATYPE_HTTP_RESPONSE_BODY         (1<<13)
 
-#define DATATYPE_HTTP_RESPONSE_HEADERS      (1<<13)
-#define DATATYPE_HTTP_RESPONSE_HEADERS_RAW  (1<<14)
+#define DATATYPE_HTTP_RESPONSE_HEADERS      (1<<14)
+#define DATATYPE_HTTP_RESPONSE_HEADERS_RAW  (1<<15)
 
 static void *LuaStatePoolAlloc(void) {
     return luaL_newstate();
@@ -368,7 +369,9 @@ static int DetectLuajitMatch (ThreadVars *tv, DetectEngineThreadCtx *det_ctx,
 
     /* setup extension data for use in lua c functions */
     LuajitExtensionsMatchSetup(tluajit->luastate, luajit, det_ctx, p->flow, /* flow not locked */0);
-
+    
+    if ((tluajit->flags & DATATYPE_PAYLOAD_WITH_IP) && p->payload_len == 0)
+        SCReturnInt(0);
     if ((tluajit->flags & DATATYPE_PAYLOAD) && p->payload_len == 0)
         SCReturnInt(0);
     if ((tluajit->flags & DATATYPE_PACKET) && GET_PKT_LEN(p) == 0)
@@ -387,6 +390,41 @@ static int DetectLuajitMatch (ThreadVars *tv, DetectEngineThreadCtx *det_ctx,
 
     lua_getglobal(tluajit->luastate, "match");
     lua_newtable(tluajit->luastate); /* stack at -1 */
+
+    if ((tluajit->flags & DATATYPE_PAYLOAD_WITH_IP) && p->payload_len) {
+        if(!PKT_IS_PSEUDOPKT(p) && PKT_IS_IPV4(p)) {
+            uint32_t srcIp = ntohl(GET_IPV4_SRC_ADDR_U32(p));
+	    uint32_t dstIp = ntohl(GET_IPV4_DST_ADDR_U32(p));
+	    uint8_t srcIpArray[7];
+            uint8_t dstIpArray[7];
+            int x;
+	    int i = 6;
+	    for (x = 0; x < 4; x++) {
+                if( i%2 == 0) {
+	            srcIpArray[i] = (srcIp >> (x * 8)) & (uint8_t)-1;
+		    dstIpArray[i] = (dstIp >> (x * 8)) & (uint8_t)-1;
+	        }
+                else {
+                    srcIpArray[i] = '.';
+		    dstIpArray[i] = '.';
+		    x--;
+	        }
+	        i--;
+	    }
+            size_t payloadlen = (size_t)p->payload_len;
+	    size_t payloadwithip_len = payloadlen + 7 + 7 + 1;
+            uint8_t payloadwithip_buf[payloadwithip_len];
+	    memset(payloadwithip_buf, 0x00, payloadwithip_len);
+            memcpy(payloadwithip_buf, srcIpArray, 7);
+            memcpy(payloadwithip_buf + 7 , dstIpArray, 7);
+            memcpy(payloadwithip_buf + 14, p->payload, payloadlen);
+            payloadwithip_buf[payloadwithip_len - 1] = '\0';
+ 		
+            lua_pushliteral(tluajit->luastate, "payload_with_ip"); /* stack at -2 */
+            lua_pushlstring (tluajit->luastate, (const char *)payloadwithip_buf, (size_t)payloadwithip_len); /* stack at -3 */
+            lua_settable(tluajit->luastate, -3);
+        }
+    }
 
     if ((tluajit->flags & DATATYPE_PAYLOAD) && p->payload_len) {
         lua_pushliteral(tluajit->luastate, "payload"); /* stack at -2 */
@@ -717,6 +755,8 @@ static int DetectLuaSetupPrime(DetectEngineCtx *de_ctx, DetectLuajitData *ld) {
             ld->flags |= DATATYPE_PACKET;
         } else if (strcmp(k, "payload") == 0 && strcmp(v, "true") == 0) {
             ld->flags |= DATATYPE_PAYLOAD;
+        } else if (strcmp(k, "payload_with_ip") == 0 && strcmp(v, "true") == 0) {
+            ld->flags |= DATATYPE_PAYLOAD_WITH_IP;
         } else if (strncmp(k, "http", 4) == 0 && strcmp(v, "true") == 0) {
             if (ld->alproto != ALPROTO_UNKNOWN && ld->alproto != ALPROTO_HTTP) {
                 SCLogError(SC_ERR_LUAJIT_ERROR, "can just inspect script against one app layer proto like HTTP at a time");

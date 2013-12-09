@@ -38,8 +38,8 @@
 #ifndef __GLOBAL_VAR_H__
 #define __GLOBAL_VAR_H__
 
-#define NUM_INT_VAR 10
-#define NUM_STR_VAR 10
+#define NUM_INT_VAR 15
+#define NUM_STR_VAR 15
 
 //Global Variable - Type int
 extern int globalInt[NUM_INT_VAR];
