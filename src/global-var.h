@@ -38,7 +38,6 @@
 #ifndef __GLOBAL_VAR_H__
 #define __GLOBAL_VAR_H__
 
-#include "flow.h"
 
 #define NUM_INT_VAR 15
 #define NUM_STR_VAR 15

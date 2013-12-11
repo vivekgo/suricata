@@ -26,13 +26,8 @@
  */
 
 #include "global-var.h"
-#include "suricata-common.h"
-#include "decode.h"
 
-#include "util-spm.h"
-#include "util-var-name.h"
-#include "util-debug.h"
-#include "util-print.h"
+#include "util-mem.h"
 
 #include<string.h>
 #include<malloc.h>
