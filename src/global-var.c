@@ -28,6 +28,16 @@
 #include "global-var.h"
 #include "suricata-common.h"
 #include "decode.h"
+
+#include "detect.h"
+#include "detect-parse.h"
+
+#include "detect-content.h"
+#include "threads.h"
+#include "flow.h"
+#include "flow-var.h"
+#include "detect-flowvar.h"
+
 #include "util-spm.h"
 #include "util-var-name.h"
 #include "util-debug.h"
@@ -51,7 +61,7 @@ void GlobalVarInit() {
 void GlobalVarFree() {
      int i = 0;
      for(i=0;i<15;i++) {
-         Scfree(globalStr[i]);
+         ScFree(globalStr[i]);
      }
 }
 
@@ -84,7 +94,7 @@ int GlobalIntSet(int idx, int value) {
 
 int GlobalStrSet(int idx, char* value) {
     if(idx >=0 && idx <15) {
-        globalStr[idx] = ScMalloc(strlen(value));
+        globalStr[idx] = (char*)ScMalloc(strlen(value));
         memcpy(globalStr[idx],value,strlen(value));
         //printf("Allocated memory for string \n");
         return 1;
@@ -94,7 +104,7 @@ int GlobalStrSet(int idx, char* value) {
 }
 
 void GlobalStrFree(int idx) {
-    Scfree(globalStr[idx]);
+    ScFree(globalStr[idx]);
     globalStr[idx] = NULL;
 }
 
