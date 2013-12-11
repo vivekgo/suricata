@@ -61,7 +61,7 @@ void GlobalVarInit() {
 void GlobalVarFree() {
      int i = 0;
      for(i=0;i<15;i++) {
-         ScFree(globalStr[i]);
+         SCFree(globalStr[i]);
      }
 }
 
@@ -94,7 +94,7 @@ int GlobalIntSet(int idx, int value) {
 
 int GlobalStrSet(int idx, char* value) {
     if(idx >=0 && idx <15) {
-        globalStr[idx] = (char*)ScMalloc(strlen(value));
+        globalStr[idx] = SCMalloc(strlen(value));
         memcpy(globalStr[idx],value,strlen(value));
         //printf("Allocated memory for string \n");
         return 1;
@@ -104,7 +104,7 @@ int GlobalStrSet(int idx, char* value) {
 }
 
 void GlobalStrFree(int idx) {
-    ScFree(globalStr[idx]);
+    SCFree(globalStr[idx]);
     globalStr[idx] = NULL;
 }
 
