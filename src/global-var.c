@@ -26,6 +26,13 @@
  */
 
 #include "global-var.h"
+#include "suricata-common.h"
+#include "decode.h"
+#include "util-spm.h"
+#include "util-var-name.h"
+#include "util-debug.h"
+#include "util-print.h"
+
 #include<string.h>
 #include<malloc.h>
 
@@ -44,7 +51,7 @@ void GlobalVarInit() {
 void GlobalVarFree() {
      int i = 0;
      for(i=0;i<15;i++) {
-         free(globalStr[i]);
+         Scfree(globalStr[i]);
      }
 }
 
@@ -87,7 +94,7 @@ int GlobalStrSet(int idx, char* value) {
 }
 
 void GlobalStrFree(int idx) {
-    free(globalStr[idx]);
+    Scfree(globalStr[idx]);
     globalStr[idx] = NULL;
 }
 
