@@ -77,9 +77,9 @@ int GlobalIntSet(int idx, int value) {
 
 int GlobalStrSet(int idx, char* value) {
     if(idx >=0 && idx <15) {
-        globalStr[idx] = (char*)malloc(strlen(value)*sizeof(char));
+        globalStr[idx] = ScMalloc(strlen(value));
+        memcpy(globalStr[idx],value,strlen(value));
         //printf("Allocated memory for string \n");
-        strcpy(globalStr[idx],value);
         return 1;
     }
     else

@@ -212,7 +212,7 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         FLOWLOCK_UNLOCK(f);
 */
     /* return value through luastate, as a luastring */
-    lua_pushlstring(luastate, (char *)buf, buflen);
+    lua_pushlstring(luastate, (char *)buf, varlen);
 
     return 1;
 
