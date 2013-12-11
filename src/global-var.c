@@ -27,7 +27,7 @@
 
 #include "global-var.h"
 
-#include "util-mem.h"
+
 
 #include<string.h>
 #include<malloc.h>
@@ -47,7 +47,7 @@ void GlobalVarInit() {
 void GlobalVarFree() {
      int i = 0;
      for(i=0;i<15;i++) {
-         SCFree(globalStr[i]);
+         free(globalStr[i]);
      }
 }
 
@@ -80,7 +80,7 @@ int GlobalIntSet(int idx, int value) {
 
 int GlobalStrSet(int idx, char* value) {
     if(idx >=0 && idx <15) {
-        globalStr[idx] = SCMalloc(strlen(value));
+        globalStr[idx] = (char*)malloc((strlen(value))*sizeof(char));
         memcpy(globalStr[idx],value,strlen(value));
         //printf("Allocated memory for string \n");
         return 1;
@@ -90,7 +90,7 @@ int GlobalStrSet(int idx, char* value) {
 }
 
 void GlobalStrFree(int idx) {
-    SCFree(globalStr[idx]);
+    free(globalStr[idx]);
     globalStr[idx] = NULL;
 }
 
