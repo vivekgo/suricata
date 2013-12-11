@@ -212,7 +212,7 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         FLOWLOCK_UNLOCK(f);
 */
     /* return value through luastate, as a luastring */
-    lua_pushlstring(luastate, (char *)buf, var_len);
+    lua_pushlstring(luastate, (char *)buf, buflen);
 
     return 1;
 
@@ -402,6 +402,7 @@ int LuajitSetGlobalStrvar(lua_State *luastate) {
         lua_pushstring(luastate, "len out of range: max 64k");
         return 2;
     }
+    SCLogDebug("Global String received %s \n",str);
 
 /*
     idx = ld->flowvar[id];
