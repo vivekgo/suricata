@@ -65,7 +65,7 @@ int GlobalIntGet(int idx) {
 }
 
 char* GlobalStrGet(int idx) {
-    if(idx >=0 && idx < NUM_STR_VAR
+    if(idx >=0 && idx < NUM_STR_VAR)
          return globalStr[idx];
     else
          return "null";
