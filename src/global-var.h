@@ -39,7 +39,7 @@
 #define __GLOBAL_VAR_H__
 
 
-#define NUM_INT_VAR 15
+#define NUM_INT_VAR 30
 #define NUM_STR_VAR 30
 
 //Global Variable - Type int

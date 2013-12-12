@@ -39,7 +39,7 @@ typedef struct DetectLuajitThreadData {
 #define DETECT_LUAJIT_MAX_FLOWVARS  15
 #define DETECT_LUAJIT_MAX_FLOWINTS  15
 #define DETECT_LUAJIT_MAX_GLOBALSTRVARS 30
-#define DETECT_LUAJIT_MAX_GLOBALINTVARS 15
+#define DETECT_LUAJIT_MAX_GLOBALINTVARS 30
 
 typedef struct DetectLuajitData {
     int thread_ctx_id;

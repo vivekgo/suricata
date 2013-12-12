@@ -32,8 +32,6 @@
 #include<string.h>
 #include<malloc.h>
 
-#define NUM_INT_VAR 15
-#define NUM_STR_VAR 30
 
 int globalInt[NUM_INT_VAR];
 char* globalStr[NUM_STR_VAR];
