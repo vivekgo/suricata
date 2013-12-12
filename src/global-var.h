@@ -39,8 +39,8 @@
 #define __GLOBAL_VAR_H__
 
 
-#define NUM_INT_VAR 30
-#define NUM_STR_VAR 30
+#define NUM_INT_VAR 15
+#define NUM_STR_VAR 15
 
 //Global Variable - Type int
 extern int globalInt[NUM_INT_VAR];
