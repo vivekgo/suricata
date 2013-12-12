@@ -38,7 +38,7 @@ typedef struct DetectLuajitThreadData {
 
 #define DETECT_LUAJIT_MAX_FLOWVARS  15
 #define DETECT_LUAJIT_MAX_FLOWINTS  15
-#define DETECT_LUAJIT_MAX_GLOBALSTRVARS 15
+#define DETECT_LUAJIT_MAX_GLOBALSTRVARS 30
 #define DETECT_LUAJIT_MAX_GLOBALINTVARS 15
 
 typedef struct DetectLuajitData {

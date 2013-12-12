@@ -32,21 +32,24 @@
 #include<string.h>
 #include<malloc.h>
 
-int globalInt[15];
-char* globalStr[15];
+#define NUM_INT_VAR 15
+#define NUM_STR_VAR 30
+
+int globalInt[NUM_INT_VAR];
+char* globalStr[NUM_STR_VAR];
 
 //Called by suricata.c on startup
 void GlobalVarInit() {
     //Initialize global variables of type int to 0 and assign memory for string variables of string type
     int i = 0;
-    for(i=0;i<15;i++) {
+    for(i=0;i<NUM_INT_VAR;i++) {
         globalInt[i] = 0;
     }
 }
 
 void GlobalVarFree() {
      int i = 0;
-     for(i=0;i<15;i++) {
+     for(i=0;i<NUM_STR_VAR;i++) {
          free(globalStr[i]);
      }
 }
@@ -55,14 +58,14 @@ void GlobalVarFree() {
 In case of invalid index, currently returning 0 - need to pack it in some struct to return NULL
 */
 int GlobalIntGet(int idx) {
-    if(idx >=0 && idx <15)
+    if(idx >=0 && idx < NUM_INT_VAR)
         return globalInt[idx];
     else
         return 0;
 }
 
 char* GlobalStrGet(int idx) {
-    if(idx >=0 && idx <15)
+    if(idx >=0 && idx < NUM_STR_VAR
          return globalStr[idx];
     else
          return "null";
@@ -70,7 +73,7 @@ char* GlobalStrGet(int idx) {
 
 // 1 on success and 0 on failure
 int GlobalIntSet(int idx, int value) {
-    if(idx >=0 && idx <15) {
+    if(idx >=0 && idx < NUM_INT_VAR) {
         globalInt[idx] = value;
         return 1;
     }
@@ -79,7 +82,7 @@ int GlobalIntSet(int idx, int value) {
 }
 
 int GlobalStrSet(int idx, char* value) {
-    if(idx >=0 && idx <15) {
+    if(idx >=0 && idx < NUM_STR_VAR) {
         globalStr[idx] = (char*)malloc((strlen(value))*sizeof(char));
         strncpy(globalStr[idx],value,strlen(value));
         //printf("Allocated memory for string \n");

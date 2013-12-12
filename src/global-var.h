@@ -40,7 +40,7 @@
 
 
 #define NUM_INT_VAR 15
-#define NUM_STR_VAR 15
+#define NUM_STR_VAR 30
 
 //Global Variable - Type int
 extern int globalInt[NUM_INT_VAR];
