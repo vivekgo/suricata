@@ -1101,7 +1101,7 @@ static int LuajitHashMapAddBoth(lua_State *luastate) {
         lua_pushstring(luastate, "2nd arg not a string");
         return 2;
     }
-    dstIp = lua_tostring(luastate, 1);
+    dstIp = lua_tostring(luastate, 2);
     if (dstIp == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
@@ -1188,7 +1188,7 @@ static int LuajitHashMapAddDstIp(lua_State *luastate) {
         lua_pushstring(luastate, "2nd arg not a string");
         return 2;
     }
-    dstIp = lua_tostring(luastate, 1);
+    dstIp = lua_tostring(luastate, 2);
     if (dstIp == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
@@ -1338,7 +1338,7 @@ static int LuajitUpdateUriList(lua_State *luastate) {
         lua_pushstring(luastate, "2nd arg not a string");
         return 2;
     }
-    dstIp = lua_tostring(luastate, 1);
+    dstIp = lua_tostring(luastate, 2);
     if (dstIp == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
