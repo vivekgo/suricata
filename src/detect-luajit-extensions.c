@@ -61,6 +61,7 @@
 
 //Vivek
 #include "global-var.h"
+#include "global-hashmap.h"
 
 #ifdef HAVE_LUAJIT
 
@@ -69,7 +70,15 @@ static const char luaext_key_det_ctx[] = "suricata:det_ctx";
 static const char luaext_key_flow[] = "suricata:flow";
 static const char luaext_key_need_flow_lock[] = "suricata:need_flow_lock";
 
-//Vivek - FreeGlobalStrvar
+/*
+Functionality added by Vivek - Support for Global Vars
+Functions added:
+-LuajitFreeGlobalStrvar()
+-LuajitGetGlobalStrvar()
+-LuajitSetGlobalStrvar()
+-LuajitGetGlobalIntvar()
+-LuajitSetGlobalIntvar()
+*/
 
 static void LuajitFreeGlobalStrvar(lua_State *luastate) {
     int id;
@@ -102,17 +111,9 @@ static void LuajitFreeGlobalStrvar(lua_State *luastate) {
 }
 
 
-
-
-//Vivek - GetGlobalStrvar
-
 static int LuajitGetGlobalStrvar(lua_State *luastate) {
-   // uint16_t idx;
     int id;
-   // Flow *f;
-   // FlowVar *fv;
     DetectLuajitData *ld;
-  //  int need_flow_lock = 0;
 
     /* need luajit data for id -> idx conversion */
     lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
@@ -125,25 +126,6 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         return 2;
     }
 
-/**
-    // don't need flow 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_flow);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    f = lua_touserdata(luastate, -1);
-    SCLogDebug("f %p", f);
-    if (f == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow");
-        return 2;
-    }
-
-    //don't  need flow lock hint 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_need_flow_lock);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    need_flow_lock = lua_toboolean(luastate, -1);
-
-*/
-    /* need flowvar idx */
     if (!lua_isnumber(luastate, 1)) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "1st arg not a number");
@@ -155,8 +137,8 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         lua_pushstring(luastate, "global var id out of range");
         return 2;
     }
+
     char* globalstrvar = GlobalStrGet(id);
-    
     if(globalstrvar == NULL) {
        lua_pushnil(luastate);
        lua_pushstring(luastate, "global string var uninitialized");
@@ -168,32 +150,6 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
         lua_pushstring(luastate, "global string var uninitialized");
         return 2;
     }    
-
-    
-   /**
-    idx = ld->flowvar[id];
-    if (idx == 0) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "flowvar id uninitialized");
-        return 2;
-    }
-
-    // lookup var 
-    if (need_flow_lock)
-        FLOWLOCK_RDLOCK(f);
-
-    fv = FlowVarGet(f, idx);
-    if (fv == NULL) {
-        if (need_flow_lock)
-            FLOWLOCK_UNLOCK(f);
-
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow var");
-        return 2;
-    }
-   */
-    //SCLogInfo("returning:");
-    //PrintRawDataFp(stdout,fv->data.fv_str.value,fv->data.fv_str.value_len);
 
     /* we're using a buffer sized at a multiple of 4 as lua_pushlstring generates
      * invalid read errors in valgrind otherwise. Adding in a nul to be sure.
@@ -207,20 +163,193 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
     memcpy(buf, globalstrvar, var_len);
     buf[var_len] = '\0';
 
-/*
-    if (need_flow_lock)
-        FLOWLOCK_UNLOCK(f);
-*/
     /* return value through luastate, as a luastring */
     lua_pushlstring(luastate, (char *)buf, buflen);
 
     return 1;
+}
 
+//Vivek - LuajitSetGlobalStrvar
+int LuajitSetGlobalStrvar(lua_State *luastate) {
+    int id;
+    const char *str;
+    int len;
+    char *buffer;
+    DetectEngineThreadCtx *det_ctx;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    /* need det_ctx */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_det_ctx);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    det_ctx = lua_touserdata(luastate, -1);
+    SCLogDebug("det_ctx %p", det_ctx);
+    if (det_ctx == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no det_ctx");
+        return 2;
+    }
+    
+    if (!lua_isnumber(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a number");
+        return 2;
+    }
+    id = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALSTRVARS) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "global str var id out of range");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    str = lua_tostring(luastate, 2);
+    if (str == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isnumber(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a number");
+        return 2;
+    }
+    len = lua_tonumber(luastate, 3);
+    if (len < 0 || len > 0xffff) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "len out of range: max 64k");
+        return 2;
+    }
+    SCLogDebug("Global String received %s \n",str);
+
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+    
+    //Setting str value for particular id
+    GlobalStrSet(id, buffer);
+
+    return 0;
 }
 
 
+//Vivek - LuajitGetGlobalIntvar
 
+static int LuajitGetGlobalIntvar(lua_State *luastate) {
+    int id;
+    DetectLuajitData *ld;
+    int number;
 
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isnumber(luastate, 1)) {
+        SCLogDebug("1st arg not a number");
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a number");
+        return 2;
+    }
+    id = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALINTVARS) {
+        SCLogDebug("id %d", id);
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "global int var id out of range");
+        return 2;
+    }
+    number = GlobalIntGet(id);
+    lua_pushnumber(luastate, (lua_Number)number);
+
+    return 1;
+}
+
+//Vivek - LuajitSetGlobalIntvar
+
+int LuajitSetGlobalIntvar(lua_State *luastate) {
+    int id;
+    DetectEngineThreadCtx *det_ctx;
+    DetectLuajitData *ld;
+    int number;
+    lua_Number luanumber;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    /* need det_ctx */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_det_ctx);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    det_ctx = lua_touserdata(luastate, -1);
+    SCLogDebug("det_ctx %p", det_ctx);
+    if (det_ctx == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no det_ctx");
+        return 2;
+    }
+
+    if (!lua_isnumber(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a number");
+        return 2;
+    }
+    id = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALINTVARS) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "global var int id out of range");
+        return 2;
+    }
+
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    luanumber = lua_tonumber(luastate, 2);
+    if (luanumber < 0 || luanumber > (double)UINT_MAX) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "value out of range, value must be unsigned 32bit int");
+        return 2;
+    }
+    number = (int)luanumber;
+
+    GlobalIntSet(id, number);
+
+    return 0;
+}
 
 
 static int LuajitGetFlowvar(lua_State *luastate) {
@@ -314,316 +443,6 @@ static int LuajitGetFlowvar(lua_State *luastate) {
     return 1;
 
 }
-
-//Vivek - LuajitSetGlobalStrvar
-int LuajitSetGlobalStrvar(lua_State *luastate) {
-    // uint16_t idx;
-    int id;
-    // Flow *f;
-    const char *str;
-    int len;
-    char *buffer;
-    DetectEngineThreadCtx *det_ctx;
-    DetectLuajitData *ld;
-    // int need_flow_lock = 0;
-
-    /* need luajit data for id -> idx conversion */
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    ld = lua_touserdata(luastate, -1);
-    SCLogDebug("ld %p", ld);
-    if (ld == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "internal error: no ld");
-        return 2;
-    }
-
-    /* need det_ctx */
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_det_ctx);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    det_ctx = lua_touserdata(luastate, -1);
-    SCLogDebug("det_ctx %p", det_ctx);
-    if (det_ctx == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "internal error: no det_ctx");
-        return 2;
-    }
-    /*
-    // need flow 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_flow);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    f = lua_touserdata(luastate, -1);
-    SCLogDebug("f %p", f);
-    if (f == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow");
-        return 2;
-    }
-
-    // need flow lock hint 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_need_flow_lock);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    need_flow_lock = lua_toboolean(luastate, -1);
-    */
-
-    /* need flowvar idx */
-    if (!lua_isnumber(luastate, 1)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "1st arg not a number");
-        return 2;
-    }
-    id = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALSTRVARS) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "global str var id out of range");
-        return 2;
-    }
-
-    if (!lua_isstring(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a string");
-        return 2;
-    }
-    str = lua_tostring(luastate, 2);
-    if (str == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "null string");
-        return 2;
-    }
-
-    if (!lua_isnumber(luastate, 3)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "3rd arg not a number");
-        return 2;
-    }
-    len = lua_tonumber(luastate, 3);
-    if (len < 0 || len > 0xffff) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "len out of range: max 64k");
-        return 2;
-    }
-    SCLogDebug("Global String received %s \n",str);
-
-/*
-    idx = ld->flowvar[id];
-    if (idx == 0) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "flowvar id uninitialized");
-        return 2;
-    }
-*/
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
-        return 2;
-    }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-    
-    //Setting str value for particular id
-    GlobalStrSet(id, buffer);
-    /*
-    if (need_flow_lock)
-        FlowVarAddStr(f, idx, buffer, len);
-    else
-        FlowVarAddStrNoLock(f, idx, buffer, len);
-    */
-    //SCLogInfo("stored:");
-    //PrintRawDataFp(stdout,buffer,len);
-    return 0;
-}
-
-
-
-
-//Vivek - LuajitGetGlobalIntvar
-
-static int LuajitGetGlobalIntvar(lua_State *luastate) {
-    // uint16_t idx;
-    int id;
-    // Flow *f;
-    // FlowVar *fv;
-    DetectLuajitData *ld;
-    // int need_flow_lock = 0;
-    int number;
-
-    /* need luajit data for id -> idx conversion */
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    ld = lua_touserdata(luastate, -1);
-    SCLogDebug("ld %p", ld);
-    if (ld == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "internal error: no ld");
-        return 2;
-    }
-
-/**
-    // need flow 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_flow);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    f = lua_touserdata(luastate, -1);
-    SCLogDebug("f %p", f);
-    if (f == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow");
-        return 2;
-    }
-
-    // need flow lock hint 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_need_flow_lock);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    need_flow_lock = lua_toboolean(luastate, -1);
-
-*/
-    /* need flowint idx */
-    if (!lua_isnumber(luastate, 1)) {
-        SCLogDebug("1st arg not a number");
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "1st arg not a number");
-        return 2;
-    }
-    id = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALINTVARS) {
-        SCLogDebug("id %d", id);
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "global int var id out of range");
-        return 2;
-    }
-    /**
-    idx = ld->flowint[id];
-    if (idx == 0) {
-        SCLogDebug("idx %u", idx);
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "flowint id uninitialized");
-        return 2;
-    }
-
-     lookup var 
-    if (need_flow_lock)
-        FLOWLOCK_RDLOCK(f);
-
-    fv = FlowVarGet(f, idx);
-    if (fv == NULL) {
-        SCLogDebug("fv NULL");
-        if (need_flow_lock)
-            FLOWLOCK_UNLOCK(f);
-
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow var");
-        return 2;
-    }
-    number = fv->data.fv_int.value;
-
-    if (need_flow_lock)
-        FLOWLOCK_UNLOCK(f);
-     */
-    /* return value through luastate, as a luanumber */
-    number = GlobalIntGet(id);
-    lua_pushnumber(luastate, (lua_Number)number);
-   // SCLogDebug("retrieved global var flow:%p idx:%u value:%u", f, idx, number);
-
-    return 1;
-
-}
-
-//Vivek - LuajitSetGlobalIntvar
-
-int LuajitSetGlobalIntvar(lua_State *luastate) {
-   // uint16_t idx;
-    int id;
-   // Flow *f;
-    DetectEngineThreadCtx *det_ctx;
-    DetectLuajitData *ld;
-   // int need_flow_lock = 0;
-    int number;
-    lua_Number luanumber;
-
-    /* need luajit data for id -> idx conversion */
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    ld = lua_touserdata(luastate, -1);
-    SCLogDebug("ld %p", ld);
-    if (ld == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "internal error: no ld");
-        return 2;
-    }
-
-    /* need det_ctx */
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_det_ctx);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    det_ctx = lua_touserdata(luastate, -1);
-    SCLogDebug("det_ctx %p", det_ctx);
-    if (det_ctx == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "internal error: no det_ctx");
-        return 2;
-    }
-    /*
-    // need flow 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_flow);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    f = lua_touserdata(luastate, -1);
-    SCLogDebug("f %p", f);
-    if (f == NULL) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "no flow");
-        return 2;
-    }
-    // need flow lock hint 
-    lua_pushlightuserdata(luastate, (void *)&luaext_key_need_flow_lock);
-    lua_gettable(luastate, LUA_REGISTRYINDEX);
-    need_flow_lock = lua_toboolean(luastate, -1);
-    */
-
-    /* need flowint idx */
-    if (!lua_isnumber(luastate, 1)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "1st arg not a number");
-        return 2;
-    }
-    id = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= DETECT_LUAJIT_MAX_GLOBALINTVARS) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "global var int id out of range");
-        return 2;
-    }
-
-    if (!lua_isnumber(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a number");
-        return 2;
-    }
-    luanumber = lua_tonumber(luastate, 2);
-    if (luanumber < 0 || luanumber > (double)UINT_MAX) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "value out of range, value must be unsigned 32bit int");
-        return 2;
-    }
-    number = (int)luanumber;
-
-    /*
-    idx = ld->flowint[id];
-    if (idx == 0) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "flowint id uninitialized");
-        return 2;
-    }
-
-    if (need_flow_lock)
-        FlowVarAddInt(f, idx, number);
-    else
-        FlowVarAddIntNoLock(f, idx, number);
-    */
-    GlobalIntSet(id, number);
-    
-    // SCLogDebug("stored flow:%p idx:%u value:%u", f, idx, number);
-    return 0;
-}
-
-
 
 
 int LuajitSetFlowvar(lua_State *luastate) {
@@ -1078,6 +897,743 @@ static int LuajitDecrFlowint(lua_State *luastate) {
 
 }
 
+
+/*
+Functionality added by Vivek - Support for Global HashMap
+Functions added:
+-LuajitHashMapFindKey
+-LuajitHashMapFindDstIp
+-LuajitHashMapAddBoth
+-LuajitHashMapAddDstIp
+-LuajitHashMapAddUri
+-LuajitUpdateUriList
+-LuajitGetIpCountUriList
+-LuajitGetInfoUriList
+-LuajitHashMapDeleteRecord
+*/
+
+/*
+Pushes 1 if key found else 0
+*/
+static int LuajitHashMapFindKey(lua_State *luastate) {
+    const char* srcip_key;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = find_key(srcip_key);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+/*
+LuajitHashMapFindDstIp
+Pushes
+-1 for error
+1 for found
+0 for not found
+*/
+static int LuajitHashMapFindDstIp(lua_State *luastate) {
+    const char* srcip_key;
+    const char* dstIp;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 2);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = find_dst_ip_In_BF_DSTIP(srcip_key,dstIp);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+
+
+/*
+LuajitHashMapFindUri
+Pushes
+-1 for error
+1 for found
+0 for not found
+*/
+static int LuajitHashMapFindUri(lua_State *luastate) {
+    const char* srcip_key;
+    const char* uri;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = find_uri_In_BF_URI(srcip_key,uri);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+/*
+LuajitHashMapAddBoth
+
+*/
+
+static int LuajitHashMapAddBoth(lua_State *luastate) {
+    const char *srcip_key, *dstip, *uri;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 1);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 3);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    add_to_both_BF(srcip_key,dstIp,uri);
+    return 1;
+}
+
+
+/*
+LuajitHashMapAddDstIp
+
+*/
+
+static int LuajitHashMapAddDstIp(lua_State *luastate) {
+    const char *srcip_key, *dstip;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 1);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    add_to_BF_DSTIP(srcip_key,dstIp);
+    return 1;
+}
+
+/*
+LuajitHashMapAddUri
+
+*/
+
+static int LuajitHashMapAddUri(lua_State *luastate) {
+    const char *srcip_key, *uri;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    add_to_BF_URI(srcip_key,uri);
+    return 1;
+}
+
+
+
+/*
+LuajitUpdateUriList
+
+*/
+
+static int LuajitUpdateUriList(lua_State *luastate) {
+    const char *srcip_key, *dstip, *uri;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 1);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 3);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    count = update_URI_List(srcip_key,dstIp,uri);
+    lua_pushnumber(luastate, (lua_Number)count);
+
+    return 1;
+   
+}
+
+
+/*
+LuajitGetIpCountUriList
+
+*/
+
+static int LuajitGetIpCountUriList(lua_State *luastate) {
+    const char *srcip_key, *uri;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    count = get_ipcount_from_URI_List(srcip_key,uri);
+    lua_pushnumber(luastate, (lua_Number)count);
+
+    return 1;
+}
+
+
+
+/*
+LuajitGetInfoUriList
+
+*/
+
+static int LuajitGetInfoUriList(lua_State *luastate) {
+    const char *srcip_key, *uri;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+
+    char* info = get_info_from_URI_List(srcip_key,uri);
+    if(info == NULL) {
+       lua_pushlstring(luastate,NULL,0);
+       return 1;
+    }
+    else {
+
+	    /* we're using a buffer sized at a multiple of 4 as lua_pushlstring generates
+	     * invalid read errors in valgrind otherwise. Adding in a nul to be sure.
+	     *
+	     * Buffer size = len + 1 (for nul) + whatever makes it a multiple of 4 */
+	    int var_len = strlen(info);
+	    size_t buflen = var_len + 1 + ((var_len + 1) % 4);
+	    char buf[buflen];
+	    memset(buf, 0x00, buflen);
+
+	    memcpy(buf, info, var_len);
+	    buf[var_len] = '\0';
+
+	    /* return value through luastate, as a luastring */
+	    lua_pushlstring(luastate, (char *)buf, buflen);
+
+    return 1;
+    }
+
+
+}
+
+
+/*
+LuajitHashMapDeleteRecord
+
+*/
+
+static int LuajitHashMapDeleteRecord(lua_State *luastate) {
+    const char *srcip_key;
+//    int srcip_len,dstip,len,uri_len;
+//    char *buffer;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+
+/*
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    srcip_len = lua_tonumber(luastate, 1);
+    if (id < 0 || id >= 16) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "srcip_len out of range");
+        return 2;
+    }
+*/
+/*
+    buffer = SCMalloc(len+1);
+    if (unlikely(buffer == NULL)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "out of memory");
+        return 2;
+    }
+    memcpy(buffer, str, len);
+    buffer[len] = '\0';
+*/    
+    delete_record(srcip_key);
+    
+    return 1;
+}
+
+
+
+
+
+
 void LuajitExtensionsMatchSetup(lua_State *lua_state, DetectLuajitData *ld, DetectEngineThreadCtx *det_ctx, Flow *f, int need_flow_lock) {
     SCLogDebug("det_ctx %p, f %p", det_ctx, f);
 
@@ -1124,7 +1680,7 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     lua_pushcfunction(lua_state, LuajitDecrFlowint);
     lua_setglobal(lua_state, "ScFlowintDecr");
 
-    //My new functions - Vivek
+    //LuajitExtensions for Functions(GlobalVar) 
     lua_pushcfunction(lua_state, LuajitGetGlobalStrvar);
     lua_setglobal(lua_state, "ScGlobalStrGet");
     
@@ -1139,8 +1695,42 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitFreeGlobalStrvar);
     lua_setglobal(lua_state, "ScGlobalStrFree");
+
+    //LuajitExtensions for Functions(GlobalHashMap) 
+    /*Find */
+    lua_pushcfunction(lua_state, LuajitHashMapFindKey);
+    lua_setglobal(lua_state, "ScHashMapFindKey");
     
+    lua_pushcfunction(lua_state, LuajitHashMapFindDstIp);
+    lua_setglobal(lua_state, "ScHashMapFindDstIp");
+
+    lua_pushcfunction(lua_state, LuajitHashMapFindUri);
+    lua_setglobal(lua_state, "ScHashMapFindUri");
     
+    /*Add */
+    lua_pushcfunction(lua_state, LuajitHashMapAddBoth);
+    lua_setglobal(lua_state, "ScHashMapAddBoth");
+    
+    lua_pushcfunction(lua_state, LuajitHashMapAddDstIp);
+    lua_setglobal(lua_state, "ScHashMapAddDstIp");
+
+    lua_pushcfunction(lua_state, LuajitHashMapAddUri);
+    lua_setglobal(lua_state, "ScHashMapAddUri");
+
+    /*URI_List*/
+    lua_pushcfunction(lua_state, LuajitUpdateUriList);
+    lua_setglobal(lua_state, "ScUpdateUriList");
+    
+    lua_pushcfunction(lua_state, LuajitGetIpCountUriList);
+    lua_setglobal(lua_state, "ScGetIpCountUriList");
+    
+    lua_pushcfunction(lua_state, LuajitGetInfoUriList);
+    lua_setglobal(lua_state, "ScGetInfoUriList");
+
+    /*Delete*/
+    lua_pushcfunction(lua_state, LuajitHashMapDeleteRecord);
+    lua_setglobal(lua_state, "ScHashMapDeleteRecord");
+
 
     return 0;
 }

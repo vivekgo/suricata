@@ -199,6 +199,7 @@ flow-storage.c flow-storage.h \
 flow-timeout.c flow-timeout.h \
 flow-util.c flow-util.h \
 flow-var.c flow-var.h \
+global-hashmap.c global-hashmap.h \
 global-var.c global-var.h \
 host.c host.h \
 host-queue.c host-queue.h \
@@ -259,6 +260,7 @@ tm-queuehandlers.c tm-queuehandlers.h \
 tm-queues.c tm-queues.h \
 tm-threads.c tm-threads.h tm-threads-common.h \
 unix-manager.c unix-manager.h \
+uthash.h \
 util-action.c util-action.h \
 util-atomic.c util-atomic.h \
 util-bloomfilter-counting.c util-bloomfilter-counting.h \
