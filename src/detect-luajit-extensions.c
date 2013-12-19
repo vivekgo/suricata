@@ -916,7 +916,7 @@ Functions added:
 Pushes 1 if key found else 0
 */
 static int LuajitHashMapFindKey(lua_State *luastate) {
-    const char* srcip_key;
+    char* srcip_key;
     DetectLuajitData *ld;
     int found;
 
@@ -957,8 +957,8 @@ Pushes
 0 for not found
 */
 static int LuajitHashMapFindDstIp(lua_State *luastate) {
-    const char* srcip_key;
-    const char* dstIp;
+    char* srcip_key;
+    char* dstIp;
     DetectLuajitData *ld;
     int found;
 
@@ -1014,8 +1014,8 @@ Pushes
 0 for not found
 */
 static int LuajitHashMapFindUri(lua_State *luastate) {
-    const char* srcip_key;
-    const char* uri;
+    char* srcip_key;
+    char* uri;
     DetectLuajitData *ld;
     int found;
 
@@ -1067,7 +1067,7 @@ LuajitHashMapAddBoth
 */
 
 static int LuajitHashMapAddBoth(lua_State *luastate) {
-    const char *srcip_key, *dstip, *uri;
+     char *srcip_key, *dstIp, *uri;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1154,7 +1154,7 @@ LuajitHashMapAddDstIp
 */
 
 static int LuajitHashMapAddDstIp(lua_State *luastate) {
-    const char *srcip_key, *dstip;
+    char *srcip_key, *dstIp;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1228,7 +1228,7 @@ LuajitHashMapAddUri
 */
 
 static int LuajitHashMapAddUri(lua_State *luastate) {
-    const char *srcip_key, *uri;
+    char *srcip_key, *uri;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1303,7 +1303,7 @@ LuajitUpdateUriList
 */
 
 static int LuajitUpdateUriList(lua_State *luastate) {
-    const char *srcip_key, *dstip, *uri;
+    char *srcip_key, *dstIp, *uri;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1394,7 +1394,7 @@ LuajitGetIpCountUriList
 */
 
 static int LuajitGetIpCountUriList(lua_State *luastate) {
-    const char *srcip_key, *uri;
+    char *srcip_key, *uri;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1472,11 +1472,11 @@ LuajitGetInfoUriList
 */
 
 static int LuajitGetInfoUriList(lua_State *luastate) {
-    const char *srcip_key, *uri;
+    char *srcip_key, *uri;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
-    int count;
+
 
     /* need luajit data for id -> idx conversion */
     lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
@@ -1572,7 +1572,7 @@ LuajitHashMapDeleteRecord
 */
 
 static int LuajitHashMapDeleteRecord(lua_State *luastate) {
-    const char *srcip_key;
+    char *srcip_key;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
