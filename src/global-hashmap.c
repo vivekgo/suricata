@@ -210,7 +210,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
         if(new_item == NULL) {
             new_item = (adhocHashMapURI*)malloc(sizeof(adhocHashMapURI));
             new_item->uri_key = (char*)malloc(strlen(uri)*sizeof(char));
-            strcpy(new_item->uri_key,uri);
+            strncpy(new_item->uri_key,uri,strlen(uri));
             new_item->count = 1;
             new_item->ip[0] = (char*)malloc(7*sizeof(char));
             strncpy(new_item->ip[0],dstIp,7);
