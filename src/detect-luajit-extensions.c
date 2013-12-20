@@ -1555,7 +1555,7 @@ static int LuajitGetInfoUriList(lua_State *luastate) {
 
 	    memcpy(buf, info, var_len);
 	    buf[var_len] = '\0';
-
+            printf("IN DETECT-LUAJIT-EXTENSIONS info is %s and buffer is %s \n",info,buf);
 	    /* return value through luastate, as a luastring */
 	    lua_pushlstring(luastate, (char *)buf, buflen);
 
