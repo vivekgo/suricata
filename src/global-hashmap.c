@@ -283,13 +283,14 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
                int i;
                int ip_count = urimap->count;
                int len_uri = strlen(urimap->uri_key);
-               return_str = (char*)malloc((len_uri + 7*ip_count)*sizeof(char));
-
+               int len_str = len_uri + 7*ip_count;
+               return_str = (char*)malloc(len_str*sizeof(char));
+               memset(return_str,0x00,len_str);
                for(i=0; i<ip_count; i++)
                    memcpy(return_str + i*7,urimap->ip[i],7);
                memcpy(return_str + ip_count*7,urimap->uri_key,len_uri);
               // memcpy(return_str + ip_count*7 + 1, '\0',1);
-
+               printf("global-hashmap.c len_uri is %d len_str is %d \n",len_uri,len_str);
                return return_str;
            }
      }
