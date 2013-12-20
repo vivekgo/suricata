@@ -208,14 +208,25 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
         adhocHashMapURI* new_item = NULL;
         HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),new_item);
         if(new_item == NULL) {
+            printf("-------------------------------------------\n");
             new_item = (adhocHashMapURI*)malloc(sizeof(adhocHashMapURI));
+            if(new_item == NULL)
+                 printf("Malloc call for adhocHashMapURI failed \n");
+            else {
             new_item->uri_key = (char*)malloc(strlen(uri)*sizeof(char));
+            if(new_item->uri_key == NULL)
+                 printf("Malloc call for uri_key failed \n");
+            else {
+            printf("Str_len of uri %d \n",strlen(uri));
             strncpy(new_item->uri_key,uri,strlen(uri));
+            printf("Str_len of uri_key %d \n",strlen(new_item->uri_key));
             new_item->count = 1;
             new_item->ip[0] = (char*)malloc(7*sizeof(char));
             strncpy(new_item->ip[0],dstIp,7);
             HASH_ADD_KEYPTR(hh1,map->URI_LIST,new_item->uri_key,strlen(new_item->uri_key),new_item);
             return 1;
+            }
+            }
         }
         else {
             int count = new_item->count + 1;
