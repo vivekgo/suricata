@@ -223,7 +223,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
             new_item->count = 1;
             new_item->ip[0] = (char*)malloc(7*sizeof(char));
             strncpy(new_item->ip[0],dstIp,7);
-            HASH_ADD_KEYPTR(hh1,map->URI_LIST,new_item->uri_key,strlen(new_item->uri_key),new_item);
+            HASH_ADD_KEYPTR(hh1,map->URI_LIST,new_item->uri_key,strlen(uri),new_item);
             return 1;
             }
             }
