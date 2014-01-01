@@ -30,7 +30,7 @@
 #include<stdio.h>
 
 adhocHashMap* IP_BFS = NULL;
-
+redirectsHashMap* RedirectsMap = NULL;
 
 /*Hash Function for Bloom Filter
 -Jenkin one at a time hash function
@@ -327,4 +327,130 @@ void delete_record(char* srcIp){
     }
 }
 
+/*
+Functions for redirectsHashMap(RedirectsMap)
+*/
+int find_key_redirectsHashMap(char* srcIp){
+    redirectsHashMap* map = NULL;
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    return map ? 1 : 0 ;	
+}
+
+int find_location_redirectsHashMap(char* srcIp, char* location){
+    redirectsHashMap* map = NULL;
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    if(map) {
+        locationHashMap* locationmap = NULL;
+        HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
+        return locationmap ? 1 : 0 ;
+    }
+    else {
+        return -1;
+    }
+}
+
+void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType) {
+    redirectsHashMap* map = NULL;
+    locationHashMap* locationmap = NULL;
+    int location_len = strlen(location);
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    if(map) {
+        HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
+        if(!locationmap) {
+            locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
+            if(locationmap == NULL) {
+                printf("Error: malloc error in add_location_redirectsHashMap");
+            }
+            else {
+                locationmap->location_key = (char*)malloc(sizeof(location_len));
+                if(locationmap->location_key == NULL) {
+                    printf("Error: malloc error in add_location_redirectsHashMap");
+                }
+                else {
+                    strncpy(locationmap->location_key,location,location_len);
+                    locationmap->count = 0;
+                    locationmap->type_redirect = redirectType;
+                    HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
+                }
+            }
+        }
+
+    }
+    else {
+        map = (redirectsHashMap*)malloc(sizeof(redirectsHashMap));
+        locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
+        if(map == NULL || locationmap == NULL) {
+            printf("Error: malloc error in add_location_redirectsHashMap");
+        }
+        else {
+            strncpy(map->srcip_key,srcIp,7);
+            map->redirectcount = 1;
+            locationmap->location_key = (char*)malloc(sizeof(location_len));
+            if(locationmap->location_key == NULL) {
+                printf("Error: malloc error in add_location_redirectsHashMap");
+            }
+            else {
+                strncpy(locationmap->location_key,location,location_len);
+                locationmap->count = 0;
+                locationmap->type_redirect = redirectType;
+                HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
+                HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
+            }
+        }
+    }
+}
+
+int get_redirectcount_redirectsHashMap(char* srcIp)
+{
+    redirectsHashMap* map = NULL;
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    if(map)
+        return HASH_CNT(hh3,map->LocationMap);
+    else
+	return -1;
+}
+
+int get_count_location_redirectsHashMap(char* srcIp, char* location)
+{
+    redirectsHashMap* map = NULL;
+    locationHashMap* locationmap = NULL;
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    if(map) {
+    	HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
+        if(locationmap)
+		return locationmap->count;
+        else
+		return -1;
+    }
+    else
+    	return -1;
+}
+
+void remove_location_redirectsHashMap(char* srcIp, char* location)
+{
+    redirectsHashMap* map = NULL;
+    locationHashMap* locationmap = NULL;
+    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    if(map) {
+        HASH_FIND(hh3,map->LocationMap, location, strlen(location),locationmap);
+        if(locationmap) {
+        	HASH_DELETE(hh3,map->LocationMap,locationmap);
+                free(locationmap);
+        }
+    }
+}
+void delete_record_redirectsHashMap(char* srcIp)
+{
+    redirectsHashMap* map = NULL;
+    locationHashMap *locationmap, *tmp;
+    HASH_FIND(hh2,RedirectsMap, srcIp, 7, map);
+    if(map) {
+        HASH_ITER(hh3,map->LocationMap, locationmap,tmp){
+            HASH_DELETE(hh3,map->LocationMap,locationmap);
+            free(locationmap);
+        }
+        HASH_DELETE(hh2,RedirectsMap,map);
+        free(map);
+    }
+}
 

@@ -29,6 +29,23 @@
 #include "uthash.h"
 #include "util-bloomfilter.h"
 
+/*Hash Table for locations for a particular srcIp */
+typedef struct {
+    char* location_key; //key
+    int type_redirect; //301,302,303,307,308
+    int count;
+    UT_hash_handle hh3;
+} locationHashMap;
+
+/*Hash Table for 302/303 redirects host+uri and srcIp */
+typedef struct {
+    char srcip_key[7]; //key
+    locationHashMap* LocationMap;
+    UT_hash_handle hh2;
+} redirectsHashMap;
+
+extern redirectsHashMap* RedirectsMap;
+
 /* HashMap for URI_LIST alongwith IPs - restricted to 3 IP associated with a URI */
 typedef struct {
     char* uri_key; //key = uri
@@ -49,7 +66,9 @@ typedef struct {
 //Global HashMap
 extern adhocHashMap* IP_BFS;
 
-
+/*
+Functions for adhocHashMap(IP_BFS)
+*/
 int find_key(char*);
 int find_dst_ip_In_BF_DSTIP(char*,char*);/*parameters: (srcIp,dstIp) */
 int find_uri_In_BF_URI(char*,char*); /*parameters: (srcIp,uri) */
@@ -65,6 +84,21 @@ char* get_info_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
 void remove_uri_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
 
 void delete_record(char*);/*parameter: srcIp */
+
+
+/*
+Functions for redirectsHashMap(RedirectsMap)
+*/
+int find_key_redirectsHashMap(char*);
+int find_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
+
+void add_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
+
+int get_redirectcount_redirectsHashMap(char*);/*parameter: srcIp */
+int get_count_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
+
+void remove_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
+void delete_record_redirectsHashMap(char*);/* parameter : srcIp */
 
 #endif
 

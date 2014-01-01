@@ -1630,6 +1630,322 @@ static int LuajitHashMapDeleteRecord(lua_State *luastate) {
 }
 
 
+/*
+Functions for RedirectHashMap
+*/
+
+/*FindKey in RedirectsMap
+Pushes 1 on success
+else 0
+*/
+static int LuajitRedirectHashMapFindKey(lua_State *luastate) {
+    char* srcip_key;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = find_key_redirectsHashMap(srcip_key);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+/*
+Find Location in RedirectsMap
+Pushes 1 on success
+0 on not found
+-1 on error
+*/
+static int LuajitRedirectHashMapFindLocation(lua_State *luastate) {
+    char* srcip_key;
+    char* location;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    location = lua_tostring(luastate, 2);
+    if (location == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = find_location_redirectsHashMap(srcip_key,location);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+/*Add Location for particular srcIp in RedirectsMap*/
+static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
+    char* srcip_key;
+    char* location;
+    int redirectType;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    location = lua_tostring(luastate, 2);
+    if (location == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isnumber(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a number");
+        return 2;
+    }
+    redirectType = lua_tonumber(luastate, 3);
+
+  
+
+    add_location_redirectsHashMap(srcip_key,location,redirectType);
+
+    return 1;
+}
+
+/*
+GetCount
+*/
+static int LuajitRedirectHashMapGetCount(lua_State *luastate) {
+    char* srcip_key;
+    DetectLuajitData *ld;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    count = get_redirectcount_redirectsHashMap(srcip_key);
+    lua_pushnumber(luastate, (lua_Number)count);
+
+    return 1;
+}
+
+static int LuajitRedirectHashMapFindLocation(lua_State *luastate) {
+    char* srcip_key;
+    char* location;
+    DetectLuajitData *ld;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    location = lua_tostring(luastate, 2);
+    if (location == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    count = get_count_location_redirectsHashMap(srcip_key,location);
+    lua_pushnumber(luastate, (lua_Number)count);
+
+    return 1;
+}
+
+/*Delete*/
+
+static int LuajitRedirectHashMapDeleteLocation(lua_State *luastate) {
+    char* srcip_key;
+    char* location;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    location = lua_tostring(luastate, 2);
+    if (location == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    remove_location_redirectsHashMap(srcip_key,location);
+
+    return 1;
+}
+
+static int LuajitRedirectHashMapDeleteRecord(lua_State *luastate) {
+    char* srcip_key;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    delete_record_redirectsHashMap(srcip_key);
+
+    return 1;
+}
+
+
+
 
 
 
@@ -1696,7 +2012,10 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     lua_pushcfunction(lua_state, LuajitFreeGlobalStrvar);
     lua_setglobal(lua_state, "ScGlobalStrFree");
 
-    //LuajitExtensions for Functions(GlobalHashMap) 
+    /*
+    LuajitExtensions for Functions(GlobalHashMap) 
+    */
+    
     /*Find */
     lua_pushcfunction(lua_state, LuajitHashMapFindKey);
     lua_setglobal(lua_state, "ScHashMapFindKey");
@@ -1730,7 +2049,34 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     /*Delete*/
     lua_pushcfunction(lua_state, LuajitHashMapDeleteRecord);
     lua_setglobal(lua_state, "ScHashMapDeleteRecord");
+ 
+    /*
+    LuajitExtensions for Functions(RedirectsMap)
+    */
+    /*Find */
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapFindKey);
+    lua_setglobal(lua_state, "ScRedirectHashMapFindKey");
+    
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapFindLocation);
+    lua_setglobal(lua_state, "ScRedirectHashMapFindLocation");
+    
+    /*Add*/
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapAddLocation);
+    lua_setglobal(lua_state, "ScRedirectHashMapAddLocation");
 
+    /*GetCount*/
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapGetCount);
+    lua_setglobal(lua_state, "ScRedirectHashMapGetCount");
+
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapGetLocationCount);
+    lua_setglobal(lua_state, "ScRedirectHashMapGetLocationCount");
+    
+    /*Delete*/
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapDeleteLocation);
+    lua_setglobal(lua_state, "ScRedirectHashMapDeleteLocation");
+    
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapDeleteRecord);
+    lua_setglobal(lua_state, "ScRedirectHashMapDeleteRecord");
 
     return 0;
 }
