@@ -92,7 +92,7 @@ Functions for redirectsHashMap(RedirectsMap)
 int find_key_redirectsHashMap(char*);
 int find_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
 
-void add_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
+void add_location_redirectsHashMap(char*,char*,int);/* parameters : (srcIp,location) */
 
 int get_redirectcount_redirectsHashMap(char*);/*parameter: srcIp */
 int get_count_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */

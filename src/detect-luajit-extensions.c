@@ -1818,7 +1818,7 @@ static int LuajitRedirectHashMapGetCount(lua_State *luastate) {
     return 1;
 }
 
-static int LuajitRedirectHashMapFindLocation(lua_State *luastate) {
+static int LuajitRedirectHashMapGetLocationCount(lua_State *luastate) {
     char* srcip_key;
     char* location;
     DetectLuajitData *ld;
