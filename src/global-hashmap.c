@@ -349,7 +349,7 @@ int find_location_redirectsHashMap(char* srcIp, char* location){
     }
 }
 
-void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType) {
+void add_location_redirectsHashMap(char* srcIp, char* location, char* redirectType) {
     redirectsHashMap* map = NULL;
     locationHashMap* locationmap = NULL;
     int location_len = strlen(location);
@@ -363,13 +363,14 @@ void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType
             }
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
-                if(locationmap->location_key == NULL) {
+                locationmap->type_redirect = (char*)malloc(3*sizeof(char));
+                if(locationmap->location_key == NULL || locationmap->type_redirect == NULL) {
                     printf("Error: malloc error in add_location_redirectsHashMap");
                 }
                 else {
                     strncpy(locationmap->location_key,location,location_len);
+                    strncpy(locationmap->type_redirect,redirectType,3);
                     locationmap->count = 0;
-                    locationmap->type_redirect = redirectType;
                     HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 }
             }
@@ -384,13 +385,14 @@ void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType
         }
         else {
             locationmap->location_key = (char*)malloc(location_len*sizeof(char));
-            if(locationmap->location_key == NULL) {
-                printf("Error: malloc error in add_location_redirectsHashMap");
+            locationmap->type_redirect = (char*)malloc(3*sizeof(char));
+            if(locationmap->location_key == NULL || locationmap->type_redirect == NULL) {
+                    printf("Error: malloc error in add_location_redirectsHashMap");
             }
             else {
                 strncpy(locationmap->location_key,location,location_len);
+                strncpy(locationmap->type_redirect,redirectType,3);
                 locationmap->count = 0;
-                locationmap->type_redirect = redirectType;
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
             }

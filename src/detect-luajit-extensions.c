@@ -1729,7 +1729,7 @@ static int LuajitRedirectHashMapFindLocation(lua_State *luastate) {
 static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
     char* srcip_key;
     char* location;
-    int redirectType;
+    char* redirectType;
     DetectLuajitData *ld;
 
     /* need luajit data for id -> idx conversion */
@@ -1767,12 +1767,18 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
         return 2;
     }
 
-    if (!lua_isnumber(luastate, 3)) {
+    if (!lua_isstring(luastate, 3)) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "3rd arg not a number");
         return 2;
     }
-    redirectType = lua_tonumber(luastate, 3);
+    redirectType = lua_tostring(luastate, 3);
+    if (redirectType == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
 
   
 
