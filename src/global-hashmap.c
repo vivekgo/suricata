@@ -362,7 +362,7 @@ void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType
                 printf("Error: malloc error in add_location_redirectsHashMap");
             }
             else {
-                locationmap->location_key = (char*)malloc(sizeof(location_len));
+                locationmap->location_key = (char*)malloc(location_len*sizeof(char));
                 if(locationmap->location_key == NULL) {
                     printf("Error: malloc error in add_location_redirectsHashMap");
                 }
@@ -383,8 +383,7 @@ void add_location_redirectsHashMap(char* srcIp, char* location, int redirectType
             printf("Error: malloc error in add_location_redirectsHashMap");
         }
         else {
-       ;
-            locationmap->location_key = (char*)malloc(sizeof(location_len));
+            locationmap->location_key = (char*)malloc(location_len*sizeof(char));
             if(locationmap->location_key == NULL) {
                 printf("Error: malloc error in add_location_redirectsHashMap");
             }
