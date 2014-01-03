@@ -350,13 +350,14 @@ int find_location_redirectsHashMap(char* srcIp, char* location){
 }
 
 void add_location_redirectsHashMap(char* srcIp, char* location, char* redirectType) {
+    printf("Came in add location function \n");
     redirectsHashMap* map = NULL;
     locationHashMap* locationmap = NULL;
     int location_len = strlen(location);
     HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
     if(map) {
         HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
-        if(!locationmap) {
+        if(locationmap == NULL) {
             locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
             if(locationmap == NULL) {
                 printf("Error: malloc error in add_location_redirectsHashMap");
@@ -378,6 +379,7 @@ void add_location_redirectsHashMap(char* srcIp, char* location, char* redirectTy
 
     }
     else {
+        printf("Came in malloc of map and locationmap \n");
         map = (redirectsHashMap*)malloc(sizeof(redirectsHashMap));
         locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
         if(map == NULL || locationmap == NULL) {
@@ -393,6 +395,7 @@ void add_location_redirectsHashMap(char* srcIp, char* location, char* redirectTy
                 strncpy(locationmap->location_key,location,location_len);
                 strncpy(locationmap->type_redirect,redirectType,3);
                 locationmap->count = 0;
+                printf("Adding values to hashmap \n");
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
             }
