@@ -1762,7 +1762,7 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
         return 2;
     }
     dstIp = lua_tostring(luastate, 2);
-    if (location == NULL) {
+    if (dstIp == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
         return 2;
