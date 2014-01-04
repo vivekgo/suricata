@@ -1770,11 +1770,11 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
 
     if (!lua_isstring(luastate, 3)) {
         lua_pushnil(luastate);
-        lua_pushstring(luastate, "3rd arg not a number");
+        lua_pushstring(luastate, "3rd arg not a string");
         return 2;
     }
     location = lua_tostring(luastate, 3);
-    if (redirectType == NULL) {
+    if (location == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
         return 2;
@@ -1782,7 +1782,7 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
 
     if (!lua_isstring(luastate, 4)) {
         lua_pushnil(luastate);
-        lua_pushstring(luastate, "3rd arg not a number");
+        lua_pushstring(luastate, "4th arg not a string");
         return 2;
     }
     redirectType = lua_tostring(luastate, 4);
