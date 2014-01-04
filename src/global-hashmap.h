@@ -33,6 +33,7 @@
 typedef struct {
     char* location_key; //key
     char* type_redirect; //301,302,303,307,308
+    char* dstIp;
     int count;
     UT_hash_handle hh3;
 } locationHashMap;
@@ -92,7 +93,8 @@ Functions for redirectsHashMap(RedirectsMap)
 int find_key_redirectsHashMap(char*);
 int find_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
 
-void add_location_redirectsHashMap(char*,char*,char*);/* parameters : (srcIp,location) */
+void add_location_redirectsHashMap(char*,char*,char*,char*);/* parameters : (srcIp,dstIp,location,redirectType) */
+int increase_locationcount_redirectsHashMap(char*,int);/*parameters: srcIp,threshold */
 
 int get_redirectcount_redirectsHashMap(char*);/*parameter: srcIp */
 int get_count_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */

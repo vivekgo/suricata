@@ -1728,6 +1728,7 @@ static int LuajitRedirectHashMapFindLocation(lua_State *luastate) {
 /*Add Location for particular srcIp in RedirectsMap*/
 static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
     char* srcip_key;
+    char* dstIp;
     char* location;
     char* redirectType;
     DetectLuajitData *ld;
@@ -1760,7 +1761,7 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
         lua_pushstring(luastate, "2nd arg not a string");
         return 2;
     }
-    location = lua_tostring(luastate, 2);
+    dstIp = lua_tostring(luastate, 2);
     if (location == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
@@ -1772,20 +1773,77 @@ static int LuajitRedirectHashMapAddLocation(lua_State *luastate) {
         lua_pushstring(luastate, "3rd arg not a number");
         return 2;
     }
-    redirectType = lua_tostring(luastate, 3);
+    location = lua_tostring(luastate, 3);
     if (redirectType == NULL) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "null string");
         return 2;
     }
 
+    if (!lua_isstring(luastate, 4)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a number");
+        return 2;
+    }
+    redirectType = lua_tostring(luastate, 4);
+    if (redirectType == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
 
-  
-
-    add_location_redirectsHashMap(srcip_key,location,redirectType);
+    
+    add_location_redirectsHashMap(srcip_key,dstIp,location,redirectType);
 
     return 1;
 }
+
+/*
+Increase Count
+*/
+static int LuajitRedirectHashMapIncreaseLocationCount(lua_State *luastate) {
+    char* srcip_key;
+    DetectLuajitData *ld;
+    int threshold;
+    int count;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isnumber(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a number");
+        return 2;
+    }
+    threshold = lua_tonumber(luastate, 2);
+
+
+    count = get_redirectcount_redirectsHashMap(srcip_key,threshold);
+    lua_pushnumber(luastate, (lua_Number)count);
+
+    return 1;
+}
+
 
 /*
 GetCount
@@ -2069,6 +2127,10 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     /*Add*/
     lua_pushcfunction(lua_state, LuajitRedirectHashMapAddLocation);
     lua_setglobal(lua_state, "ScRedirectHashMapAddLocation");
+    
+    /*Increment*/
+    lua_pushcfunction(lua_state, LuajitRedirectHashMapIncreaseLocationCount);
+    lua_setglobal(lua_state, "ScRedirectHashMapIncreaseLocationCount");
 
     /*GetCount*/
     lua_pushcfunction(lua_state, LuajitRedirectHashMapGetCount);
