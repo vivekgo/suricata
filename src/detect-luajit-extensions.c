@@ -1838,7 +1838,7 @@ static int LuajitRedirectHashMapIncreaseLocationCount(lua_State *luastate) {
     threshold = lua_tonumber(luastate, 2);
 
 
-    count = get_redirectcount_redirectsHashMap(srcip_key,threshold);
+    count = increase_locationcount_redirectsHashMap(srcip_key,threshold);
     lua_pushnumber(luastate, (lua_Number)count);
 
     return 1;
