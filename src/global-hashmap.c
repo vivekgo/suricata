@@ -398,6 +398,7 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                 strncpy(locationmap->type_redirect,redirectType,3);
                 locationmap->count = 0;
                 strncpy(map->srcip_key,srcIp,7);
+                printf("Adding to hashMap and dstIp is %s \n",locationmap->dstIp);
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
             }
