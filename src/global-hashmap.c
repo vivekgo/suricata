@@ -422,6 +422,7 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold)
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp){
             locationmap->count = locationmap->count + 1;
+            printf("Location %s Count %d \n",locationmap->location_key,locationmap->count);
             if(locationmap->count > threshold) {
             printf("------------------------------------------------\n");
             printf("SrcIp: %s DstIp %s \n",srcIp,locationmap->dstIp);
