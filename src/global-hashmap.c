@@ -235,10 +235,10 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
         else {
             int i = 0;
             int count = new_item->count;
-            bool ip_already_present = false;
+            int ip_already_present = 0;
             for(i = 0; i < count; i++) {
                 if(!(strncmp(dstIp,new_item->ip[i],7))) {
-                    ip_already_present = true;
+                    ip_already_present = 1;
                     break;
                 }
             }
@@ -324,7 +324,7 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
 
 void remove_uri_from_URI_List(char* srcIp, char* uri){
     adhocHashMap* map = NULL;
-    adhocHashMap* urimap = NULL;
+    adhocHashMapURI* urimap = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map){
         HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
