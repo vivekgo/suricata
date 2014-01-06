@@ -87,16 +87,16 @@ int find_dst_ip_In_BF_DSTIP(char* srcIp, char* dstIp){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-      //   printf("------------Error: Application Level should take care of this----------------------------\n");
+         printf("------------Error: Application Level should take care of this----------------------------\n");
          return -1;
      }
      else {
          if(BloomFilterTest(map->BF_DST_IP,dstIp,strlen(dstIp))) {
-    //            printf("-------This dstIP is already present in BloomFilter------------------\n");
+                printf("-------This dstIP is already present in BloomFilter------------------\n");
 		return 1;
          }
          else {
-        //        printf("--------This dstIp is not  present in BloomFilter----------------\n");
+                printf("--------This dstIp is not  present in BloomFilter----------------\n");
                 return 0;
          }
      }
@@ -110,16 +110,16 @@ int find_uri_In_BF_URI(char* srcIp, char* uri){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-        // printf("------------Error: Application Level should take care of this----------------------------\n");
+         printf("------------Error: Application Level should take care of this----------------------------\n");
          return -1;
      }
      else {
          if(BloomFilterTest(map->BF_URI,uri,strlen(uri))) {
-          //      printf("-------This uri is already present in BloomFilter------------------\n");
+                printf("-------This uri is already present in BloomFilter------------------\n");
                 return 1;
          }
          else {
-            //    printf("--------This uri is not present in BloomFilter----------------\n");
+                printf("--------This uri is not present in BloomFilter----------------\n");
                 return 0;
          }
      }
@@ -208,7 +208,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
         adhocHashMapURI* new_item = NULL;
         HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),new_item);
         if(new_item == NULL) {
-            printf("-------------------------------------------\n");
+            //printf("-------------------------------------------\n");
             new_item = (adhocHashMapURI*)malloc(sizeof(adhocHashMapURI));
             if(new_item == NULL) {
                  printf("Malloc call for adhocHashMapURI failed \n");
@@ -221,9 +221,9 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
                     return -1;
                 }
                 else {
-                    printf("Str_len of uri %d \n",strlen(uri));
+              //      printf("Str_len of uri %d \n",strlen(uri));
                     strncpy(new_item->uri_key,uri,strlen(uri));
-                    printf("Str_len of uri_key %d \n",strlen(new_item->uri_key));
+              //      printf("Str_len of uri_key %d \n",strlen(new_item->uri_key));
                     new_item->count = 1;
                     new_item->ip[0] = (char*)malloc(7*sizeof(char));
                     strncpy(new_item->ip[0],dstIp,7);
@@ -316,7 +316,7 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
                    memcpy(return_str + i*7,urimap->ip[i],7);
                memcpy(return_str + ip_count*7,urimap->uri_key,len_uri);
               // memcpy(return_str + ip_count*7 + 1, '\0',1);
-               printf("global-hashmap.c len_uri is %d len_str is %d \n",len_uri,len_str);
+              // printf("global-hashmap.c len_uri is %d len_str is %d \n",len_uri,len_str);
                return return_str;
            }
      }
