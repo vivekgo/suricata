@@ -92,11 +92,11 @@ int find_dst_ip_In_BF_DSTIP(char* srcIp, char* dstIp){
      }
      else {
          if(BloomFilterTest(map->BF_DST_IP,dstIp,strlen(dstIp))) {
-                printf("-------This dstIP is already present in BloomFilter------------------\n");
+               // printf("-------This dstIP is already present in BloomFilter------------------\n");
 		return 1;
          }
          else {
-                printf("--------This dstIp is not  present in BloomFilter----------------\n");
+                // printf("--------This dstIp is not  present in BloomFilter----------------\n");
                 return 0;
          }
      }
@@ -115,11 +115,11 @@ int find_uri_In_BF_URI(char* srcIp, char* uri){
      }
      else {
          if(BloomFilterTest(map->BF_URI,uri,strlen(uri))) {
-                printf("-------This uri is already present in BloomFilter------------------\n");
+                // printf("-------This uri is already present in BloomFilter------------------\n");
                 return 1;
          }
          else {
-                printf("--------This uri is not present in BloomFilter----------------\n");
+                // printf("--------This uri is not present in BloomFilter----------------\n");
                 return 0;
          }
      }
