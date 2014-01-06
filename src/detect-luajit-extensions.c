@@ -1567,6 +1567,55 @@ static int LuajitGetInfoUriList(lua_State *luastate) {
 
 
 /*
+LuajitHashMapDeleteUriRecord
+
+*/
+
+static int LuajitHashMapDeleteUriRecord(lua_State *luastate) {
+    char *srcip_key, *uri;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }   
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }   
+
+    remove_uri_from_URI_List(srcip_key,uri);
+    return 1;
+}
+
+
+/*
 LuajitHashMapDeleteRecord
 
 */
@@ -1601,31 +1650,7 @@ static int LuajitHashMapDeleteRecord(lua_State *luastate) {
     }
     
 
-/*
-    if (!lua_isnumber(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a number");
-        return 2;
-    }
-    srcip_len = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= 16) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "srcip_len out of range");
-        return 2;
-    }
-*/
-/*
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
-        return 2;
-    }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-*/    
     delete_record(srcip_key);
-    
     return 1;
 }
 
@@ -2102,15 +2127,18 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
 
     /*URI_List*/
     lua_pushcfunction(lua_state, LuajitUpdateUriList);
-    lua_setglobal(lua_state, "ScUpdateUriList");
+    lua_setglobal(lua_state, "ScHashMapUpdateUriList");
     
     lua_pushcfunction(lua_state, LuajitGetIpCountUriList);
-    lua_setglobal(lua_state, "ScGetIpCountUriList");
+    lua_setglobal(lua_state, "ScHashMapGetIpCountUriList");
     
     lua_pushcfunction(lua_state, LuajitGetInfoUriList);
-    lua_setglobal(lua_state, "ScGetInfoUriList");
+    lua_setglobal(lua_state, "ScHashMapGetInfoUriList");
 
     /*Delete*/
+    lua_pushcfunction(lua_state, LuajitHashMapDeleteUriRecord);
+    lua_setglobal(lua_state, "ScHashMapDeleteUriRecord");
+
     lua_pushcfunction(lua_state, LuajitHashMapDeleteRecord);
     lua_setglobal(lua_state, "ScHashMapDeleteRecord");
  

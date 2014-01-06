@@ -323,6 +323,16 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
 }
 
 void remove_uri_from_URI_List(char* srcIp, char* uri){
+    adhocHashMap* map = NULL;
+    adhocHashMap* urimap = NULL;
+    HASH_FIND_STR(IP_BFS,srcIp,map);
+    if(map){
+        HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
+        if(urimap){
+            HASH_DELETE(hh1,map->URI_LIST,urimap);
+            free(urimap);
+        }
+    }
     
 }
 
