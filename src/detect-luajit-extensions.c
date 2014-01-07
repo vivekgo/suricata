@@ -1268,34 +1268,51 @@ static int LuajitHashMapAddUri(lua_State *luastate) {
         return 2;
     }
 
+    add_to_BF_URI(srcip_key,uri);
+    return 1;
+}
+
 /*
+LuajitHashMapRefreshBloomFilters
+*/
+
+static int LuajitHashMapRefreshBloomFilters(lua_State *luastate){
+    char *srcIp;
+    double threshold;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcIp = lua_tostring(luastate, 1);
+    if (srcIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+    }
+    
     if (!lua_isnumber(luastate, 2)) {
         lua_pushnil(luastate);
         lua_pushstring(luastate, "2nd arg not a number");
         return 2;
     }
-    srcip_len = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= 16) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "srcip_len out of range");
-        return 2;
-    }
-*/
-/*
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
-        return 2;
-    }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-*/    
-    add_to_BF_URI(srcip_key,uri);
-    return 1;
+    threshold = lua_tostring(luastate, 2);
+    refresh_bloomfilters(srcIp,threshold);
+
+    
 }
-
-
 
 /*
 LuajitUpdateUriList
@@ -1357,29 +1374,6 @@ static int LuajitUpdateUriList(lua_State *luastate) {
         return 2;
     }
 
-/*
-    if (!lua_isnumber(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a number");
-        return 2;
-    }
-    srcip_len = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= 16) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "srcip_len out of range");
-        return 2;
-    }
-*/
-/*
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
-        return 2;
-    }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-*/    
     count = update_URI_List(srcip_key,dstIp,uri);
     lua_pushnumber(luastate, (lua_Number)count);
 
@@ -2134,6 +2128,11 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitGetInfoUriList);
     lua_setglobal(lua_state, "ScHashMapGetInfoUriList");
+
+    /*Refresh Bloom Filters*/
+    lua_pushcfunction(lua_state, LuajitHashMapRefreshBloomFilters);
+    lua_setglobal(lua_state, "ScHashMapRefreshBloomFilters");
+
 
     /*Delete*/
     lua_pushcfunction(lua_state, LuajitHashMapDeleteUriRecord);

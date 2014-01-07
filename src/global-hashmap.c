@@ -28,6 +28,7 @@
 #include<string.h>
 #include<stdlib.h>
 #include<stdio.h>
+#include<math.h>
 
 adhocHashMap* IP_BFS = NULL;
 redirectsHashMap* RedirectsMap = NULL;
@@ -156,13 +157,18 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 	BloomFilterAdd(map->BF_URI,uri,strlen(uri));
 
 	map->URI_LIST = NULL;
-      
+        
+        map->bf_ip_count = 1;
+        map->bf_uri_count = 1;
 	HASH_ADD_STR(IP_BFS,srcip_key,map);
         }
         else {
             BloomFilterAdd(map->BF_DST_IP,dstIp,strlen(dstIp));
             BloomFilterAdd(map->BF_URI,uri,strlen(uri));
+            map->bf_ip_count = map->bf_ip_count + 1;
+            map->bf_uri_count = map->bf_uri_count + 1;
         }
+        
 }
 
 /*
@@ -173,6 +179,7 @@ void add_to_BF_DSTIP(char* srcIp, char* dstIp){
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map != NULL) {
         BloomFilterAdd(map->BF_DST_IP,dstIp,strlen(dstIp));
+        map->bf_ip_count = map->bf_ip_count + 1;
     }
     else {
         printf("-----------------Error: Application Level should guarantee that srcIp is present as a key already---------------- \n");
@@ -187,6 +194,7 @@ void add_to_BF_URI(char* srcIp, char* uri){
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map != NULL) {
         BloomFilterAdd(map->BF_URI,uri,strlen(uri));
+        map->bf_uri_count = map->bf_uri_count + 1;
     }
     else {
         printf("-----------------Error: Application Level should guarantee that srcIp is present as a key already---------------- \n");
@@ -320,6 +328,31 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
                return return_str;
            }
      }
+}
+
+/*
+empty bloom filters when the false positive rate is greater than the parameter
+*/
+void refresh_bloomfilters(char* srcIp,double threshold){
+    adhocHashMap* map = NULL;
+    HASH_FIND_STR(IP_BFS,srcIp,map);
+    if(map){
+        int size_bf = 262144;
+        double n_by_m_bf_ip = -(map->bf_ip_count/size_bf);
+        double n_by_m_bf_uri = -(map->bf_uri_count/size_bf);
+        double fp_rate_bf_ip = 1 - exp(n_by_m_bf_ip);
+        double fp_rate_bf_uri = 1 - exp(n_by_m_bf_uri);
+        if(fp_rate_bf_ip >= threshold){
+            BloomFilterFree(map->BF_DST_IP);
+            map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
+            map->BF_DST_IP = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+        }
+        if(fp_rate_bf_uri >= threshold){
+            BloomFilterFree(map->BF_URI);
+            map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
+            map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+        }
+    }
 }
 
 void remove_uri_from_URI_List(char* srcIp, char* uri){

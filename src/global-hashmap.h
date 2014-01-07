@@ -60,6 +60,8 @@ typedef struct {
     char srcip_key[7]; //key = srcIp
     BloomFilter* BF_DST_IP;
     BloomFilter* BF_URI;
+    int bf_ip_count;
+    int bf_uri_count;
     adhocHashMapURI* URI_LIST;
     UT_hash_handle hh;
 } adhocHashMap;
@@ -83,6 +85,8 @@ int update_URI_List(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 int get_ipcount_from_URI_List(char*,char*);
 char* get_info_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
 void remove_uri_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
+
+void refresh_bloomfilters(char*,double);
 
 void delete_record(char*);/*parameter: srcIp */
 
