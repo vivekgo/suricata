@@ -370,7 +370,7 @@ void log_info_from_URI_List(char* srcIp, char* uri){
                printf("----------------------------------------------\n");
                printf("SrcIP: %s \n ", srcIp);
 
-               for(i=0; i < uri_map->count; i++) {
+               for(i=0; i < urimap->count; i++) {
                    printf("DstIP[%d]: %s Host: %s \n ",i, urimap->ip[i],urimap->host[i]);
                }
                printf("Uri: %s \n",urimap->uri_key);
