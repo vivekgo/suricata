@@ -341,10 +341,10 @@ void log_info_from_URI_List(char* srcIp, char* uri) {
          else {
              int i;
              printf("----------------------------------------------\n");
-             printf("SrcIP: %u.%u.%u.%u \n ", srcIp[0],srcIp[2],srcIp[4],srcIp[6]);
+             printf("SrcIP: %hhu.%hhu.%hhu.%hhu \n ", srcIp[0],srcIp[2],srcIp[4],srcIp[6]);
 
              for(i=0; i < urimap->count; i++) {
-                 printf("DstIP[%d]: %u.%u.%u.%u Host: %s \n ",i, (urimap->ip[i])[0],(urimap->ip[i])[2], (urimap->ip[i])[4], (urimap->ip[i])[6], urimap->host[i]);
+                 printf("DstIP[%d]: %hhu.%hhu.%hhu.%hhu Host: %s \n ",i, (urimap->ip[i])[0],(urimap->ip[i])[2], (urimap->ip[i])[4], (urimap->ip[i])[6], urimap->host[i]);
              }
              printf("Uri: %s \n",urimap->uri_key);
          }
