@@ -52,6 +52,7 @@ typedef struct {
     char* uri_key; //key = uri
     int count;
     char* ip[MAX_NUM_IP];
+    char* host[MAX_NUM_IP];
     UT_hash_handle hh1;
 } adhocHashMapURI;
 
@@ -81,9 +82,11 @@ void add_to_both_BF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 void add_to_BF_DSTIP(char*,char*);/*parameters: (srcIp,dstIp) */
 void add_to_BF_URI(char*,char*);/*parameters: (srcIp,uri) */
 
-int update_URI_List(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
+int update_URI_List(char*,char*,char*,char*);/*parameters: (srcIp,dstIp,uri,host) */
 int get_ipcount_from_URI_List(char*,char*);
 char* get_info_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
+void log_info_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
+
 void remove_uri_from_URI_List(char*,char*);/*parameters: (srcIp,uri) */
 
 void refresh_bloomfilters(char*,double);

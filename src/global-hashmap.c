@@ -88,7 +88,7 @@ int find_dst_ip_In_BF_DSTIP(char* srcIp, char* dstIp){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-         printf("------------Error: Application Level should take care of this----------------------------\n");
+         printf("------------Error: global-hashmap.c - find_dst_ip_In_BF_DSTIP - Application Level should take care of this----------------------------\n");
          return -1;
      }
      else {
@@ -111,7 +111,7 @@ int find_uri_In_BF_URI(char* srcIp, char* uri){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-         printf("------------Error: Application Level should take care of this----------------------------\n");
+         printf("------------Error: global-hashmap.c - find_uri_In_BF_URI - Application Level should take care of this----------------------------\n");
          return -1;
      }
      else {
@@ -182,7 +182,8 @@ void add_to_BF_DSTIP(char* srcIp, char* dstIp){
         map->bf_ip_count = map->bf_ip_count + 1;
     }
     else {
-        printf("-----------------Error: Application Level should guarantee that srcIp is present as a key already---------------- \n");
+        printf("-----------------Error: global-hashmap.c - add_to_BF_DSTIP - Application Level should guarantee that srcIp is present as a key already---------------- \n");
+
     }
 }
 
@@ -197,7 +198,7 @@ void add_to_BF_URI(char* srcIp, char* uri){
         map->bf_uri_count = map->bf_uri_count + 1;
     }
     else {
-        printf("-----------------Error: Application Level should guarantee that srcIp is present as a key already---------------- \n");
+        printf("-----------------Error: global-hashmap.c - add_to_BF_URI - Application Level should guarantee that srcIp is present as a key already---------------- \n");
     }
 }
 
@@ -209,23 +210,24 @@ value of count
 -1 for error
 Other Int for length of IP_List for that particular URI
 */
-int update_URI_List(char* srcIp, char* dstIp, char* uri){
+int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host){
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map != NULL) {
+        int host_len = strlen(host);
         adhocHashMapURI* new_item = NULL;
         HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),new_item);
         if(new_item == NULL) {
             //printf("-------------------------------------------\n");
             new_item = (adhocHashMapURI*)malloc(sizeof(adhocHashMapURI));
             if(new_item == NULL) {
-                 printf("Malloc call for adhocHashMapURI failed \n");
+                 printf("------------------------Malloc Error: global-hashmap.c : update_URI_List - call for adhocHashMapURI failed \n");
                  return -1;
             }
             else {
                 new_item->uri_key = (char*)malloc(strlen(uri)*sizeof(char));
                 if(new_item->uri_key == NULL) {
-                    printf("Malloc call for uri_key failed \n");
+                    printf("---------------Malloc Error: global-hashmap.c : update_URI_List - call for uri_key failed \n");
                     return -1;
                 }
                 else {
@@ -234,7 +236,15 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
               //      printf("Str_len of uri_key %d \n",strlen(new_item->uri_key));
                     new_item->count = 1;
                     new_item->ip[0] = (char*)malloc(7*sizeof(char));
-                    strncpy(new_item->ip[0],dstIp,7);
+                    new_item->host[0] = (char*)malloc(host_len*sizeof(char));
+                    if(new_item->ip[0] != NULL && new_item->host[0] != NULL) {
+                        strncpy(new_item->ip[0],dstIp,7);
+                        strncpy(new_item->host[0],host,host_len);
+                    }
+                    else {
+                        printf("------------------Malloc Error: global-hashmap.c : update_URI_List -  call for new_item->ip[0] or new_item->host[0] failed.\n");
+                        return -1;
+                    }
                     HASH_ADD_KEYPTR(hh1,map->URI_LIST,new_item->uri_key,strlen(uri),new_item);
                     return 1;
                 }
@@ -252,7 +262,15 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
             }
             if(!ip_already_present) {
                 new_item->ip[count] = (char*)malloc(7*sizeof(char));
-                strncpy(new_item->ip[count],dstIp,7);
+                new_item->host[count] = (char*)malloc(host_len*sizeof(char));
+                if(new_item->ip[count] != NULL && new_item->host[count] != NULL) {
+                        strncpy(new_item->ip[count],dstIp,7);
+                        strncpy(new_item->host[count],host,host_len);
+                }
+                else {
+                        printf("------------------Malloc Error: global-hashmap.c : update_URI_List -  call for new_item->ip[count] or new_item->host[count] failed.\n");
+                        return -1;
+                }
                 count++;
                 new_item->count = count;
             }
@@ -260,7 +278,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri){
         }
     }
     else {
-        printf("-----------------Error: Application Level should guarantee that srcIp is present as a key already---------------- \n");
+        printf("-----------------Error:  global-hashmap.c : update_URI_List---------------- \n");
         return -1;
     }
 
@@ -276,14 +294,14 @@ int get_ipcount_from_URI_List(char* srcIp, char* uri){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-        printf("-------Error: Application Level should take care of this----------------\n");
+        printf("-------Error: global-hashmap.c - get_ipcount_from_URI_List----------------\n");
         return -1;
      }
      else {
            adhocHashMapURI* urimap = NULL;
            HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
            if(urimap == NULL) {
-               printf("-----Error:URI_LIST doesn't contain this uri-------------------\n");
+               printf("-------Error: global-hashmap.c - get_ipcount_from_URI_List----------------\n");
                return -1;
            }
            else {
@@ -303,14 +321,14 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(map == NULL) {
-	printf("-------Error: Application Level should take care of this----------------\n");
+	printf("-------Error: global-hashmap.c - get_info_from_URI_List----------------\n");
         return NULL;
      }
      else {
            adhocHashMapURI* urimap = NULL;
            HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
            if(urimap == NULL) {
-               printf("-----Error:URI_LIST doesn't contain this uri-------------------\n");
+               printf("-------Error: global-hashmap.c - get_info_from_URI_List----------------\n");
                return NULL;
            }
            else {
@@ -329,6 +347,37 @@ char* get_info_from_URI_List(char* srcIp, char* uri){
            }
      }
 }
+
+/* Assumption srcIP exists as a key and uri exists in URI_LIST
+- Logs Info
+*/
+void log_info_from_URI_List(char* srcIp, char* uri){
+     adhocHashMap* map = NULL;
+     HASH_FIND_STR(IP_BFS,srcIp,map);
+     if(map == NULL) {
+        printf("-------Error: global-hashmap.c : log_info_from_URI_List()----------------\n");
+        return NULL;
+     }
+     else {
+           adhocHashMapURI* urimap = NULL;
+           HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
+           if(urimap == NULL) {
+               printf("-----Error: global-hashmap.c : log_info_from_URI_List()-------------------\n");
+               return NULL;
+           }
+           else {
+               int i;
+               printf("----------------------------------------------\n");
+               printf("SrcIP: %s \n ", srcIp);
+
+               for(i=0; i < uri_map->count; i++) {
+                   printf("DstIP[%d]: %s Host: %s \n ",i, urimap->ip[i],urimap->host[i]);
+               }
+               printf("Uri: %s \n",urimap->uri_key);
+           }
+     }
+}
+
 
 /*
 empty bloom filters when the false positive rate is greater than the parameter
@@ -417,14 +466,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         if(locationmap == NULL) {
             locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
             if(locationmap == NULL) {
-                printf("Error: malloc error in add_location_redirectsHashMap");
+                printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap----------------------------------");
             }
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
                 locationmap->dstIp = (char*)malloc(7*sizeof(char));
                 locationmap->type_redirect = (char*)malloc(3*sizeof(char));
                 if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
-                    printf("Error: malloc error in add_location_redirectsHashMap");
+                    printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap----------------------------------");
                 }
                 else {
                     strncpy(locationmap->location_key,location,location_len);
@@ -441,14 +490,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         map = (redirectsHashMap*)malloc(sizeof(redirectsHashMap));
         locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
         if(map == NULL || locationmap == NULL) {
-            printf("Error: malloc error in add_location_redirectsHashMap");
+            printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap----------------------------------");
         }
         else {
             locationmap->location_key = (char*)malloc(location_len*sizeof(char));
             locationmap->dstIp = (char*)malloc(7*sizeof(char));
             locationmap->type_redirect = (char*)malloc(3*sizeof(char));
             if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
-                    printf("Error: malloc error in add_location_redirectsHashMap");
+                    printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap----------------------------------");
             }
             else {
                 strncpy(locationmap->location_key,location,location_len);
@@ -456,7 +505,7 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                 strncpy(locationmap->type_redirect,redirectType,3);
                 locationmap->count = 0;
                 strncpy(map->srcip_key,srcIp,7);
-                printf("Adding to hashMap and dstIp is %s \n",locationmap->dstIp);
+               // printf("Adding to hashMap and dstIp is %s \n",locationmap->dstIp);
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
             }
@@ -481,12 +530,12 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold)
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp){
             locationmap->count = locationmap->count + 1;
-            printf("Location %s Count %d \n",locationmap->location_key,locationmap->count);
+            //printf("Location %s Count %d \n",locationmap->location_key,locationmap->count);
             if(locationmap->count > threshold) {
-            printf("------------------------------------------------\n");
-            printf("SrcIp: %s DstIp %s \n",srcIp,locationmap->dstIp);
-            printf("RedirectionType: %s Location %s \n",locationmap->type_redirect,locationmap->location_key);
-            printf("-------------------------------------------------\n");
+            //printf("------------------------------------------------\n");
+            //printf("SrcIp: %s DstIp %s \n",srcIp,locationmap->dstIp);
+            //printf("RedirectionType: %s Location %s \n",locationmap->type_redirect,locationmap->location_key);
+            //printf("-------------------------------------------------\n");
             HASH_DELETE(hh3,map->LocationMap,locationmap);
             free(locationmap);
             count++;

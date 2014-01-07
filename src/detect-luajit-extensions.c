@@ -1319,7 +1319,7 @@ LuajitUpdateUriList
 */
 
 static int LuajitUpdateUriList(lua_State *luastate) {
-    char *srcip_key, *dstIp, *uri;
+    char *srcip_key, *dstIp, *uri, *host;
 //    int srcip_len,dstip,len,uri_len;
 //    char *buffer;
     DetectLuajitData *ld;
@@ -1373,7 +1373,20 @@ static int LuajitUpdateUriList(lua_State *luastate) {
         return 2;
     }
 
-    count = update_URI_List(srcip_key,dstIp,uri);
+    if (!lua_isstring(luastate, 4)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "4th arg not a string");
+        return 2;
+    }
+    host = lua_tostring(luastate, 4);
+    if (host == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+
+    count = update_URI_List(srcip_key,dstIp,uri,host);
     lua_pushnumber(luastate, (lua_Number)count);
 
     return 1;
@@ -1458,6 +1471,52 @@ static int LuajitGetIpCountUriList(lua_State *luastate) {
 }
 
 
+/*LuajitLogInfoUriList
+*/
+
+static int LuajitLogInfoUriList(lua_State *luastate) {
+    char *srcip_key, *uri;
+    DetectLuajitData *ld;
+
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 2);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    log_info_from_URI_List(srcip_key,uri);
+    return 1;
+}
 
 /*
 LuajitGetInfoUriList
@@ -1506,30 +1565,6 @@ static int LuajitGetInfoUriList(lua_State *luastate) {
         return 2;
     }
 
-/*
-    if (!lua_isnumber(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a number");
-        return 2;
-    }
-    srcip_len = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= 16) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "srcip_len out of range");
-        return 2;
-    }
-*/
-/*
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
-        return 2;
-    }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-*/    
-
     char* info = get_info_from_URI_List(srcip_key,uri);
     if(info == NULL) {
        lua_pushlstring(luastate,NULL,0);
@@ -1548,7 +1583,7 @@ static int LuajitGetInfoUriList(lua_State *luastate) {
 
 	    memcpy(buf, info, var_len);
 	    buf[var_len] = '\0';
-            printf("IN DETECT-LUAJIT-EXTENSIONS info is %s and buffer is %s \n",info,buf);
+    //        printf("IN DETECT-LUAJIT-EXTENSIONS info is %s and buffer is %s \n",info,buf);
 	    /* return value through luastate, as a luastring */
 	    lua_pushlstring(luastate, (char *)buf, buflen);
 
@@ -2124,6 +2159,9 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitGetIpCountUriList);
     lua_setglobal(lua_state, "ScHashMapGetIpCountUriList");
+
+    lua_pushcfunction(lua_state, LuajitLogInfoUriList);
+    lua_setglobal(lua_state, "ScHashMapLogInfoUriList");
     
     lua_pushcfunction(lua_state, LuajitGetInfoUriList);
     lua_setglobal(lua_state, "ScHashMapGetInfoUriList");
