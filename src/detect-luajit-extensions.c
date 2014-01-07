@@ -1308,10 +1308,9 @@ static int LuajitHashMapRefreshBloomFilters(lua_State *luastate){
         lua_pushstring(luastate, "2nd arg not a number");
         return 2;
     }
-    threshold = lua_tostring(luastate, 2);
-    refresh_bloomfilters(srcIp,threshold);
+    threshold = lua_tonumber(luastate, 2);
 
-    
+    refresh_bloomfilters(srcIp,threshold);    
 }
 
 /*
