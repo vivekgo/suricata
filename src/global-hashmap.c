@@ -440,7 +440,7 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
             printf("Creating new locationmap for this location \n"); 
             locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
             if(!locationmap) {
-                printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap----------------------------------");
+                printf("------------------Malloc Error: global-hashmap.c - add_location_redirectsHashMap-----------------");
             }
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
@@ -457,8 +457,8 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                     printf("Added Successfully \n");
                     HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                     redirectsHashMap* testmap = NULL;
-                locationHashMap* locationtestmap = NULL;
-                HASH_FIND(hh2,RedirectsMap,srcIp,7,testmap);
+                    locationHashMap* locationtestmap = NULL;
+                    HASH_FIND(hh2,RedirectsMap,srcIp,7,testmap);
                 if(testmap){
                         printf("Added and Tested srcIp entry \n");
                         HASH_FIND(hh3,testmap->LocationMap,location,strlen(location),locationtestmap);
@@ -495,11 +495,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                 strncpy(locationmap->type_redirect,redirectType,3);
                 locationmap->count = 0;
                 strncpy(map->srcip_key,srcIp,7);
+                map->LocationMap = NULL;
+
                 printf("Added srcIP entry \n");
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
                 
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 printf("Added location entry \n");
+
                 redirectsHashMap* testmap = NULL;
                 locationHashMap* locationtestmap = NULL;
                 HASH_FIND(hh2,RedirectsMap,srcIp,7,testmap);
