@@ -497,8 +497,9 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                 strncpy(map->srcip_key,srcIp,7);
                 printf("Added srcIP entry \n");
                 HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
-                printf("Added Location entry \n");
+                
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
+                printf("Added location entry \n");
                 redirectsHashMap* testmap = NULL;
                 locationHashMap* locationtestmap = NULL;
                 HASH_FIND(hh2,RedirectsMap,srcIp,7,testmap);
