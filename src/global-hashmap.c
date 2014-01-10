@@ -512,7 +512,7 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold)
             if(locationmap->count > threshold) {
                printf("----------------------------------------------------------\n");
                printf("SrcIp: %s \n",srcIp);
-               printf("Location: %s \n",locationmap->location_key);
+               printf("Location: %s Type: %s \n",locationmap->location_key, locationmap->type_redirect);
                HASH_DELETE(hh3,map->LocationMap,locationmap);
                free(locationmap);
                count++;
