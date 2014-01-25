@@ -109,6 +109,8 @@ int get_count_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,loca
 void remove_location_redirectsHashMap(char*,char*);/* parameters : (srcIp,location) */
 void delete_record_redirectsHashMap(char*);/* parameter : srcIp */
 
+
+void TempRaiseAlertHeuristic10();
 #endif
 
 

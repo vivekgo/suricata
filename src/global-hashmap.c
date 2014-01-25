@@ -578,3 +578,15 @@ void delete_record_redirectsHashMap(char* srcIp)
     }
 }
 
+void TempRaiseAlertHeuristic10(){
+	// iterate over redirectsHashMap go over all srcIps and print alerts
+        redirectsHashMap *map, *tmp_map;
+        locationHashMap *locationmap,*tmp_locationmap;
+        HASH_ITER(hh2,RedirectsMap,map,tmp_map){
+            if(map) {
+                HASH_ITER(hh3,map->LocationMap,locationmap,tmp_locationmap){
+                    printf("Alert_10: SrcIp: %s RedirectType: %s Location %s \n",map->srcip_key,locationmap->type_redirect,locationmap->location_key);
+                }
+            }
+        }
+}
