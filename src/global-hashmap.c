@@ -164,7 +164,8 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 		strncpy(map->srcip_key,srcIp,7);
 		map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
-                if(map->BF_DST_IP && map->BF_URI) {
+                map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
+                if(map->BF_DST_IP && map->BF_URI && map->BF_PAIR_DSTIP_URI) {
 		    map->BF_DST_IP = BloomFilterInit(256*1024,1,BloomFilterHashFn);
 		    BloomFilterAdd(map->BF_DST_IP,dstIp,strlen(dstIp));
 
