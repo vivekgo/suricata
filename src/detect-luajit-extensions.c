@@ -1200,7 +1200,7 @@ LuajitHashMapAddToPairBF
 */
 
 static int LuajitHashMapAddToPairBF(lua_State *luastate) {
-     char *srcip_key, *dstIp, *uri;
+    char *srcip_key, *dstIp, *uri;
     DetectLuajitData *ld;
 
     /* need luajit data for id -> idx conversion */

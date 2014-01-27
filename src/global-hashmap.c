@@ -114,14 +114,16 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
      }
      else {
         printf("---FindPair: Before Malloc-------\n");
-        int pair_size = strlen(dstIp) + strlen(uri);
-        char* pair_str = (char*)malloc(pair_size*sizeof(char));
+        int dstIp_len = strlen(dstIp);
+        int uri_len = strlen(uri);
+        int pair_str_len = dstIp_len + uri_len + 1;
+        char* pair_str = (char*)malloc(pair_str_len*sizeof(char));
         if(pair_str) {
             printf("---FindPair: After Malloc-------\n");
-            strncat(pair_str,dstIp,strlen(dstIp));
-            strncat(pair_str,uri,strlen(uri));
+            memcpy(pair_str,dstIp,dstIp_len);
+            memcpy(pair_str + dstIp_len,uri,uri_len + 1);
             printf("---FindPair: After strncat-------\n");
-            if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_size)) {
+            if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_str_len)) {
                 printf("-----------BloomFilterTest - True--------------------\n");
                 return 1;
             }
@@ -130,7 +132,7 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
                 return 0;
             }
 
-            //free(pair_str);
+            free(pair_str);
         }
         else {
             printf("-------------Malloc Error: global-hashmap.c - find_pair_In_BF_PAIR_DSTIP_URI  for malloc of pair_str-------------------------\n");
@@ -203,19 +205,19 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map) {
         printf("---addToPair: Before Malloc-------\n");
-        int pair_size = strlen(dstIp) + strlen(uri);
-        char* pair_str = (char*)malloc(pair_size*sizeof(char));
+        int dstIp_len = strlen(dstIp);
+        int uri_len = strlen(uri);
+        int pair_str_len = dstIp_len + uri_len + 1;
+        char* pair_str = (char*)malloc(pair_str_len*sizeof(char));
         if(pair_str) {
             printf("---addToPair: After Malloc-------\n");
-            strncat(pair_str,dstIp,strlen(dstIp));
-            printf("Str with dstIp %s \n",pair_str);
-            strncat(pair_str,uri,strlen(uri));
-            printf("Str with dstIp:uri %s \n",pair_str);
+            memcpy(pair_str,dstIp,dstIp_len);
+            memcpy(pair_str + dstIp_len,uri,uri_len + 1);
             printf("---addToPair: After strncat-------\n");
-            BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
+            BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_str_len);
             printf("------------Added to BF_PAIR_DSTIP_URI----------------\n");
             map->bf_pair_count = map->bf_pair_count + 1;
-           // free(pair_str);
+            free(pair_str);
         }
         else {
             printf("-------------Malloc Error: global-hashmap.c - add_to_pairBF for malloc of pair_str-------------------------\n");
