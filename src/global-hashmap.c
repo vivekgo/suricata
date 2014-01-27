@@ -201,14 +201,14 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map) {
-        printf("---FindPair: Before Malloc-------\n");
+        printf("---addToPair: Before Malloc-------\n");
         int pair_size = strlen(dstIp) + strlen(uri);
         char* pair_str = (char*)malloc(pair_size*sizeof(char));
         if(pair_str) {
-            printf("---FindPair: After Malloc-------\n");
+            printf("---addToPair: After Malloc-------\n");
             strncat(pair_str,dstIp,strlen(dstIp));
             strncat(pair_str,uri,strlen(uri));
-            printf("---FindPair: After strncat-------\n");
+            printf("---addToPair: After strncat-------\n");
             BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
             printf("------------Added to BF_PAIR_DSTIP_URI----------------\n");
             map->bf_pair_count = map->bf_pair_count + 1;
