@@ -159,6 +159,7 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 	   map = (adhocHashMap*)malloc(sizeof(adhocHashMap));
            if(map){
 		strncpy(map->srcip_key,srcIp,7);
+                HASH_ADD_STR(IP_BFS,srcip_key,map);
 		map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
@@ -176,7 +177,7 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
                	    map->bf_ip_count = 1;
         	    map->bf_uri_count = 1;
                     map->bf_pair_count = 0;
-		    HASH_ADD_STR(IP_BFS,srcip_key,map);
+		    //HASH_ADD_STR(IP_BFS,srcip_key,map);
                     if(find_key(srcIp)) {
                         return 1;
                     }
