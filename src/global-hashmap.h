@@ -81,7 +81,7 @@ int find_uri_In_BF_URI(char*,char*); /*parameters: (srcIp,uri) */
 int find_uri_In_URI_List(char*,char*,char*); /*parameters: (srcIp,dstIp,uri) */
 int find_pair_In_BF_PAIR_DSTIP_URI(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 
-void add_to_both_BF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
+int add_to_both_BF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 void add_to_pairBF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 void add_to_BF_DSTIP(char*,char*);/*parameters: (srcIp,dstIp) */
 void add_to_BF_URI(char*,char*);/*parameters: (srcIp,uri) */
