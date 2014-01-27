@@ -56,7 +56,6 @@ BloomFilter *BloomFilterInit(uint32_t size, uint8_t iter, uint32_t (*Hash)(void 
     return bf;
 
 error:
-    printf("Error: BloomFilterInit \n");
     if (bf != NULL) {
         if (bf->bitarray != NULL)
             SCFree(bf->bitarray);
@@ -94,7 +93,6 @@ int BloomFilterAdd(BloomFilter *bf, void *data, uint16_t datalen) {
     for (iter = 0; iter < bf->hash_iterations; iter++) {
         hash = bf->Hash(data, datalen, iter, bf->bitarray_size);
         bf->bitarray[hash/8] |= (1<<hash%8);
-        printf("In for loop of BloomFilterAdd \n");
     }
 
     return 0;

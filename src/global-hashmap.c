@@ -113,22 +113,17 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
          return -1;
      }
      else {
-        printf("---FindPair: Before Malloc-------\n");
         int dstIp_len = strlen(dstIp);
         int uri_len = strlen(uri);
         int pair_str_len = dstIp_len + uri_len + 1;
         char* pair_str = (char*)malloc(pair_str_len*sizeof(char));
         if(pair_str) {
-            printf("---FindPair: After Malloc-------\n");
             memcpy(pair_str,dstIp,dstIp_len);
             memcpy(pair_str + dstIp_len,uri,uri_len + 1);
-            printf("---FindPair: After strncat-------\n");
             if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_str_len)) {
-                printf("-----------BloomFilterTest - True--------------------\n");
                 return 1;
             }
             else{
-                printf("-----------BloomFilterTest - False--------------------\n");
                 return 0;
             }
 
@@ -204,18 +199,14 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map) {
-        printf("---addToPair: Before Malloc-------\n");
         int dstIp_len = strlen(dstIp);
         int uri_len = strlen(uri);
         int pair_str_len = dstIp_len + uri_len + 1;
         char* pair_str = (char*)malloc(pair_str_len*sizeof(char));
         if(pair_str) {
-            printf("---addToPair: After Malloc-------\n");
             memcpy(pair_str,dstIp,dstIp_len);
             memcpy(pair_str + dstIp_len,uri,uri_len + 1);
-            printf("---addToPair: After strncat-------\n");
             BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_str_len);
-            printf("------------Added to BF_PAIR_DSTIP_URI----------------\n");
             map->bf_pair_count = map->bf_pair_count + 1;
             free(pair_str);
         }
@@ -439,8 +430,10 @@ void refresh_bloomfilters(char* srcIp,double threshold) {
         int size_bf = 262144;
         double n_by_m_bf_ip = -(map->bf_ip_count/size_bf);
         double n_by_m_bf_uri = -(map->bf_uri_count/size_bf);
+        double n_by_m_bf_pair = -(map->bf_pair_count/size_bf);
         double fp_rate_bf_ip = 1 - exp(n_by_m_bf_ip);
         double fp_rate_bf_uri = 1 - exp(n_by_m_bf_uri);
+        double fp_rate_bf_pair = 1 - exp(n_by_m_bf_pair);
         if(fp_rate_bf_ip >= threshold) {
             BloomFilterFree(map->BF_DST_IP);
             map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
@@ -451,6 +444,12 @@ void refresh_bloomfilters(char* srcIp,double threshold) {
             map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
             map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
         }
+        if(fp_rate_bf_pair >= threshold) {
+            BloomFilterFree(map->BF_PAIR_DSTIP_URI);
+            map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
+            map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+        }
+
     }
 }
 
