@@ -100,6 +100,40 @@ int find_uri_In_BF_URI(char* srcIp, char* uri){
      }
 }
 
+
+/*
+Assumption - srcIP exists as key
+returns 1 if exist else 0 error -1
+*/
+int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
+     adhocHashMap* map = NULL;
+     HASH_FIND_STR(IP_BFS,srcIp,map);
+     if(!map) {
+         printf("------------Error: global-hashmap.c - find_uri_In_BF_URI - Application Level should take care of this----------------------------\n");
+         return -1;
+     }
+     else {
+        int pair_size = strlen(dstIp) + strlen(uri);
+        char* pair_str = (char*)malloc(pair_size*sizeof(char));
+        if(pair_str) {
+            strncat(pair_str,dstIp,strlen(dstIp));
+            strncat(pair_str,uri,strlen(uri));
+            if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_size))
+                return 1;
+            else
+                return 0;
+
+            free(pair_str);
+        }
+        else {
+            printf("-------------Malloc Error: global-hashmap.c - find_pair_In_BF_PAIR_DSTIP_URI  for malloc of pair_str-------------------------\n");
+            return -1;
+        }
+     }
+}
+
+
+
 /*
 Assumption - srcIP exists as key
 returns 1 if exist else 0 error -1
@@ -130,10 +164,13 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 		    map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
 		    BloomFilterAdd(map->BF_URI,uri,strlen(uri));
 
+                    map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+
 		    map->URI_LIST = NULL;
         
                	    map->bf_ip_count = 1;
         	    map->bf_uri_count = 1;
+                    map->bf_pair_count = 0;
 		    HASH_ADD_STR(IP_BFS,srcip_key,map);
                 }
                 else {
@@ -151,6 +188,30 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
             map->bf_uri_count = map->bf_uri_count + 1;
         }
 }
+
+
+void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
+    adhocHashMap* map = NULL;
+    HASH_FIND_STR(IP_BFS,srcIp,map);
+    if(map) {
+        int pair_size = strlen(dstIp) + strlen(uri);
+        char* pair_str = (char*)malloc(pair_size*sizeof(char));
+        if(pair_str) {
+            strncat(pair_str,dstIp,strlen(dstIp));
+            strncat(pair_str,uri,strlen(uri));
+            BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
+            map->bf_pair_count = map->bf_pair_count + 1;
+            free(pair_str);
+        }
+        else {
+            printf("-------------Malloc Error: global-hashmap.c - add_to_pairBF for malloc of pair_str-------------------------\n");
+        }
+    }
+    else {
+        printf("-----------------Error: global-hashmap.c - add_to_pairBF - Application Level should guarantee that srcIp is present as a key already---------------- \n");
+    }
+}
+
 
 /*
 -srcIp already exists as a key and update the BF_DST_IP with the given dstIp

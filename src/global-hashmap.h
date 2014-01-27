@@ -59,10 +59,12 @@ typedef struct {
 /* HashMap - srcIp as key and two bloomfilters to store dstip and uri, as well as another hashmap of URIs */
 typedef struct {
     char srcip_key[7]; //key = srcIp
+    BloomFilter* BF_PAIR_DSTIP_URI;
     BloomFilter* BF_DST_IP;
     BloomFilter* BF_URI;
     int bf_ip_count;
     int bf_uri_count;
+    int bf_pair_count;
     adhocHashMapURI* URI_LIST;
     UT_hash_handle hh;
 } adhocHashMap;
@@ -77,8 +79,10 @@ int find_key(char*);
 int find_dst_ip_In_BF_DSTIP(char*,char*);/*parameters: (srcIp,dstIp) */
 int find_uri_In_BF_URI(char*,char*); /*parameters: (srcIp,uri) */
 int find_uri_In_URI_List(char*,char*,char*); /*parameters: (srcIp,dstIp,uri) */
+int find_pair_In_BF_PAIR_DSTIP_URI(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 
 void add_to_both_BF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
+void add_to_pairBF(char*,char*,char*);/*parameters: (srcIp,dstIp,uri) */
 void add_to_BF_DSTIP(char*,char*);/*parameters: (srcIp,dstIp) */
 void add_to_BF_URI(char*,char*);/*parameters: (srcIp,uri) */
 

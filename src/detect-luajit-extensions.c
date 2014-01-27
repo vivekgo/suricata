@@ -1062,16 +1062,16 @@ static int LuajitHashMapFindUri(lua_State *luastate) {
 }
 
 /*
-LuajitHashMapAddBoth
-
+LuajitHashMapFindPairDstIpUri
+Pushes
+-1 for error
+1 for found
+0 for not found
 */
-
-static int LuajitHashMapAddBoth(lua_State *luastate) {
-     char *srcip_key, *dstIp, *uri;
-//    int srcip_len,dstip,len,uri_len;
-//    char *buffer;
+static int LuajitHashMapFindPairDstIpUri(lua_State *luastate) {
+    char *srcip_key, *dstIp, *uri;
     DetectLuajitData *ld;
-
+    int found;
     /* need luajit data for id -> idx conversion */
     lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
     lua_gettable(luastate, LUA_REGISTRYINDEX);
@@ -1094,7 +1094,6 @@ static int LuajitHashMapAddBoth(lua_State *luastate) {
         lua_pushstring(luastate, "null string");
         return 2;
     }
-    
 
     if (!lua_isstring(luastate, 2)) {
         lua_pushnil(luastate);
@@ -1120,32 +1119,142 @@ static int LuajitHashMapAddBoth(lua_State *luastate) {
         return 2;
     }
 
+    found = find_pair_In_BF_PAIR_DSTIP_URI(srcip_key,dstIp,uri);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+
+
+
+
+
 /*
-    if (!lua_isnumber(luastate, 2)) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "2nd arg not a number");
-        return 2;
-    }
-    srcip_len = lua_tonumber(luastate, 1);
-    if (id < 0 || id >= 16) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "srcip_len out of range");
-        return 2;
-    }
+LuajitHashMapAddBoth
+
 */
-/*
-    buffer = SCMalloc(len+1);
-    if (unlikely(buffer == NULL)) {
+
+static int LuajitHashMapAddBoth(lua_State *luastate) {
+     char *srcip_key, *dstIp, *uri;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
         lua_pushnil(luastate);
-        lua_pushstring(luastate, "out of memory");
+        lua_pushstring(luastate, "internal error: no ld");
         return 2;
     }
-    memcpy(buffer, str, len);
-    buffer[len] = '\0';
-*/    
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 2);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 3);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
     add_to_both_BF(srcip_key,dstIp,uri);
     return 1;
 }
+
+
+
+
+
+/*
+LuajitHashMapAddToPairBF
+
+*/
+
+static int LuajitHashMapAddToPairBF(lua_State *luastate) {
+     char *srcip_key, *dstIp, *uri;
+    DetectLuajitData *ld;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    srcip_key = lua_tostring(luastate, 1);
+    if (srcip_key == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    dstIp = lua_tostring(luastate, 2);
+    if (dstIp == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 3);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    add_to_pairBF(srcip_key,dstIp,uri);
+    return 1;
+}
+
+
 
 
 /*
@@ -2142,10 +2251,17 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
 
     lua_pushcfunction(lua_state, LuajitHashMapFindUri);
     lua_setglobal(lua_state, "ScHashMapFindUri");
+
+    lua_pushcfunction(lua_state, LuajitHashMapFindPairDstIpUri);
+    lua_setglobal(lua_state, "ScHashMapFindPairDstIpUri");
     
     /*Add */
     lua_pushcfunction(lua_state, LuajitHashMapAddBoth);
     lua_setglobal(lua_state, "ScHashMapAddBoth");
+    
+    lua_pushcfunction(lua_state, LuajitHashMapAddToPairBF);
+    lua_setglobal(lua_state, "ScHashMapAddToPairBF");
+
     
     lua_pushcfunction(lua_state, LuajitHashMapAddDstIp);
     lua_setglobal(lua_state, "ScHashMapAddDstIp");
