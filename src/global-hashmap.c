@@ -177,7 +177,11 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
         	    map->bf_uri_count = 1;
                     map->bf_pair_count = 0;
 		    HASH_ADD_STR(IP_BFS,srcip_key,map);
-                    return 1;
+                    if(find_key(srcIp)) {
+                        return 1;
+                    }
+                    else
+                        return 0;
                 }
                 else {
                     printf("-------------Malloc Error: global-hashmap.c - add_to_both_BF() for malloc of BloomFilters-------------------------\n");
@@ -219,6 +223,9 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
         }
     }
     else {
+        if(find_key(srcIp)) {
+                        printf("-------FIND KEY Returned 1----------------\n");
+                    }
         printf("-----------------Error: global-hashmap.c - add_to_pairBF - Application Level should guarantee that srcIp is present as a key already---------------- \n");
     }
 }
