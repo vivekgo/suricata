@@ -208,7 +208,9 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
         if(pair_str) {
             printf("---addToPair: After Malloc-------\n");
             strncat(pair_str,dstIp,strlen(dstIp));
+            printf("Str with dstIp %s \n",pair_str);
             strncat(pair_str,uri,strlen(uri));
+            printf("Str with dstIp:uri %s \n",pair_str);
             printf("---addToPair: After strncat-------\n");
             BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
             printf("------------Added to BF_PAIR_DSTIP_URI----------------\n");
