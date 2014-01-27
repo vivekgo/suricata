@@ -109,7 +109,7 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-         printf("------------Error: global-hashmap.c - find_uri_In_BF_URI - Application Level should take care of this----------------------------\n");
+         printf("------------Error: global-hashmap.c - find_pair_In_BF_PAIR_DSTIP_URI - Application Level should take care of this----------------------------\n");
          return -1;
      }
      else {
@@ -121,10 +121,14 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
             strncat(pair_str,dstIp,strlen(dstIp));
             strncat(pair_str,uri,strlen(uri));
             printf("---FindPair: After strncat-------\n");
-            if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_size))
+            if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_size)) {
+                printf("-----------BloomFilterTest - True--------------------\n");
                 return 1;
-            else
+            }
+            else{
+                printf("-----------BloomFilterTest - False--------------------\n");
                 return 0;
+            }
 
             //free(pair_str);
         }
@@ -206,6 +210,7 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
             strncat(pair_str,uri,strlen(uri));
             printf("---FindPair: After strncat-------\n");
             BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
+            printf("------------Added to BF_PAIR_DSTIP_URI----------------\n");
             map->bf_pair_count = map->bf_pair_count + 1;
            // free(pair_str);
         }
