@@ -113,11 +113,14 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri){
          return -1;
      }
      else {
+        printf("---FindPair: Before Malloc-------\n");
         int pair_size = strlen(dstIp) + strlen(uri);
         char* pair_str = (char*)malloc(pair_size*sizeof(char));
         if(pair_str) {
+            printf("---FindPair: After Malloc-------\n");
             strncat(pair_str,dstIp,strlen(dstIp));
             strncat(pair_str,uri,strlen(uri));
+            printf("---FindPair: After strncat-------\n");
             if(BloomFilterTest(map->BF_PAIR_DSTIP_URI,pair_str,pair_size))
                 return 1;
             else
@@ -194,11 +197,14 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map) {
+        printf("---FindPair: Before Malloc-------\n");
         int pair_size = strlen(dstIp) + strlen(uri);
         char* pair_str = (char*)malloc(pair_size*sizeof(char));
         if(pair_str) {
+            printf("---FindPair: After Malloc-------\n");
             strncat(pair_str,dstIp,strlen(dstIp));
             strncat(pair_str,uri,strlen(uri));
+            printf("---FindPair: After strncat-------\n");
             BloomFilterAdd(map->BF_PAIR_DSTIP_URI,pair_str,pair_size);
             map->bf_pair_count = map->bf_pair_count + 1;
            // free(pair_str);
