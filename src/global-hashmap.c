@@ -152,7 +152,7 @@ int find_uri_In_URI_List(char* srcIp, char*,char*){
 -Application checks if this srcIp is present as a key or not
 -If this key is not present - then only this function is called.
 */
-void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
+int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
         adhocHashMap* map = NULL;
         HASH_FIND_STR(IP_BFS,srcIp,map);
         if(!map) {
@@ -177,13 +177,16 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
         	    map->bf_uri_count = 1;
                     map->bf_pair_count = 0;
 		    HASH_ADD_STR(IP_BFS,srcip_key,map);
+                    return 1;
                 }
                 else {
                     printf("-------------Malloc Error: global-hashmap.c - add_to_both_BF() for malloc of BloomFilters-------------------------\n");
+                    return 0;
                 }
            }
            else {
                printf("-------------Malloc Error: global-hashmap.c - add_to_both_BF() for malloc of adhocHashMap-------------------------\n");
+               return 0;
            }
         }
         else {
@@ -191,6 +194,7 @@ void add_to_both_BF(char* srcIp, char* dstIp, char* uri){
             BloomFilterAdd(map->BF_URI,uri,strlen(uri));
             map->bf_ip_count = map->bf_ip_count + 1;
             map->bf_uri_count = map->bf_uri_count + 1;
+            return 1;
         }
 }
 

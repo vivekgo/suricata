@@ -1136,7 +1136,7 @@ LuajitHashMapAddBoth
 */
 
 static int LuajitHashMapAddBoth(lua_State *luastate) {
-     char *srcip_key, *dstIp, *uri;
+    char *srcip_key, *dstIp, *uri;
     DetectLuajitData *ld;
 
     /* need luajit data for id -> idx conversion */
@@ -1185,8 +1185,9 @@ static int LuajitHashMapAddBoth(lua_State *luastate) {
         lua_pushstring(luastate, "null string");
         return 2;
     }
-    
-    add_to_both_BF(srcip_key,dstIp,uri);
+    int status;
+    status = add_to_both_BF(srcip_key,dstIp,uri);
+    lua_pushnumber(luastate, (lua_Number)status);
     return 1;
 }
 
