@@ -155,7 +155,7 @@ int find_uri_In_URI_List(char* srcIp, char*,char*){
 int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
         adhocHashMap* map = NULL;
         HASH_FIND_STR(IP_BFS,srcIp,map);
-        if(!map) {
+        if(map == NULL) {
 	   map = (adhocHashMap*)malloc(sizeof(adhocHashMap));
            if(map){
 		strncpy(map->srcip_key,srcIp,7);
@@ -206,7 +206,7 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 void add_to_pairBF(char* srcIp, char* dstIp, char* uri){
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
-    if(map) {
+    if(map != NULL) {
         int dstIp_len = strlen(dstIp);
         int uri_len = strlen(uri);
         int pair_str_len = dstIp_len + uri_len + 1;
