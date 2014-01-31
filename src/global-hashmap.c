@@ -159,7 +159,6 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
 	   map = (adhocHashMap*)malloc(sizeof(adhocHashMap));
            if(map){
 		strncpy(map->srcip_key,srcIp,7);
-                HASH_ADD_STR(IP_BFS,srcip_key,map);
 		map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
@@ -177,7 +176,7 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
                	    map->bf_ip_count = 1;
         	    map->bf_uri_count = 1;
                     map->bf_pair_count = 0;
-		    //HASH_ADD_STR(IP_BFS,srcip_key,map);
+		    HASH_ADD_STR(IP_BFS,srcip_key,map);
                     if(find_key(srcIp)) {
                         return 1;
                     }
@@ -455,6 +454,15 @@ void refresh_bloomfilters(char* srcIp,double threshold) {
             BloomFilterFree(map->BF_URI);
             map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
             map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+            //Refresh URI List
+            adhocHashMapURI *urimap, *tmp;
+            HASH_ITER(hh1,map->URI_LIST,urimap,tmp) {
+                HASH_DELETE(hh1,map->URI_LIST,urimap);
+                free(urimap);
+            }
+            free(map->URI_LIST);
+            map->URI_LIST = NULL;
+
         }
         if(fp_rate_bf_pair >= threshold) {
             BloomFilterFree(map->BF_PAIR_DSTIP_URI);
@@ -673,7 +681,7 @@ void TempRaiseAlertHeuristic10(){
         HASH_ITER(hh2,RedirectsMap,map,tmp_map){
             if(map) {
                 HASH_ITER(hh3,map->LocationMap,locationmap,tmp_locationmap){
-                    printf("Alert_10: SrcIp: %hhu.%hhu.%hhu.%hhu  RedirectType: %s Location %s \n",map->srcip_key[0],map->srcip_key[2],map->srcip_key[4],map->srcip_key[6],locationmap->type_redirect,locationmap->location_key);
+                    printf("Alert_13: Redirection SrcIp: %hhu.%hhu.%hhu.%hhu  RedirectType: %s Location %s \n",map->srcip_key[0],map->srcip_key[2],map->srcip_key[4],map->srcip_key[6],locationmap->type_redirect,locationmap->location_key);
                 }
             }
         }
