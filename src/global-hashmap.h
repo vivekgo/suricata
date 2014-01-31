@@ -28,6 +28,7 @@
 
 #include "uthash.h"
 #include "util-bloomfilter.h"
+#include "hash-functions.h"
 
 /*Hash Table for locations for a particular srcIp */
 typedef struct {

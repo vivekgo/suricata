@@ -39,6 +39,7 @@ FP probability = (1-e^(-n/m))
 where n = number of elements inserted in Bloom Filter
 m = size of bitarray
 */ 
+/*
 static uint32_t BloomFilterHashFn(void *data, uint16_t datalen, uint8_t iter, uint32_t hash_size) {
     uint32_t hash, i;
     uint8_t *d = (uint8_t*)data;
@@ -54,7 +55,7 @@ static uint32_t BloomFilterHashFn(void *data, uint16_t datalen, uint8_t iter, ui
     hash %= hash_size;
     return hash; 
 }
-
+*/
 
 int find_key(char* srcIp){
     adhocHashMap* map = NULL;
@@ -163,13 +164,13 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri){
                 map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
                 map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
                 if(map->BF_DST_IP && map->BF_URI && map->BF_PAIR_DSTIP_URI) {
-		    map->BF_DST_IP = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+		    map->BF_DST_IP = BloomFilterInit(256*1024,10,BloomFilterHashFn);
 		    BloomFilterAdd(map->BF_DST_IP,dstIp,strlen(dstIp));
 
-		    map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+		    map->BF_URI = BloomFilterInit(256*1024,10,BloomFilterHashFn);
 		    BloomFilterAdd(map->BF_URI,uri,strlen(uri));
 
-                    map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+                    map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,10,BloomFilterHashFn);
 
 		    map->URI_LIST = NULL;
         
@@ -448,12 +449,12 @@ void refresh_bloomfilters(char* srcIp,double threshold) {
         if(fp_rate_bf_ip >= threshold) {
             BloomFilterFree(map->BF_DST_IP);
             map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
-            map->BF_DST_IP = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+            map->BF_DST_IP = BloomFilterInit(256*1024,10,BloomFilterHashFn);
         }
         if(fp_rate_bf_uri >= threshold) {
             BloomFilterFree(map->BF_URI);
             map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
-            map->BF_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+            map->BF_URI = BloomFilterInit(256*1024,10,BloomFilterHashFn);
             //Refresh URI List
             adhocHashMapURI *urimap, *tmp;
             HASH_ITER(hh1,map->URI_LIST,urimap,tmp) {
@@ -467,7 +468,7 @@ void refresh_bloomfilters(char* srcIp,double threshold) {
         if(fp_rate_bf_pair >= threshold) {
             BloomFilterFree(map->BF_PAIR_DSTIP_URI);
             map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
-            map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,1,BloomFilterHashFn);
+            map->BF_PAIR_DSTIP_URI = BloomFilterInit(256*1024,10,BloomFilterHashFn);
         }
 
     }
