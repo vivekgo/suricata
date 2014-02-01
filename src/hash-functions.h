@@ -21,7 +21,8 @@
 #define __HASH_FUNCTIONS_H__
 
 
-#include <stdio.h>
+#include<stdio.h>
+#include<stdlib.h>
 
 
 //typedef uint32_t (*hash_function)(uint8_t*, uint16_t len);
