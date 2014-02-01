@@ -54,7 +54,7 @@ struct {
     }; 
 
 
-static uint32_t BloomFilterHashFn(void *data, uint16_t datalen, uint8_t iter, uint32_t hash_size) {
+uint32_t BloomFilterHashFn(void *data, uint16_t datalen, uint8_t iter, uint32_t hash_size) {
     uint32_t hash;
     uint8_t *str = (uint8_t*)data;
     if(iter >=0 && iter <= 9) 
