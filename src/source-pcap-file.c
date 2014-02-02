@@ -206,7 +206,7 @@ TmEcode ReceivePcapFileLoop(ThreadVars *tv, void *data, void *slot)
                 SCReturnInt(TM_ECODE_DONE);
             }
         } else if (unlikely(r == 0)) {
-            TempRaiseAlertHeuristic10();
+            //TempRaiseAlertHeuristic10();
             SCLogInfo("pcap file end of file reached (pcap err code %" PRId32 ")", r);
             if (! RunModeUnixSocketIsActive()) {
                 EngineStop();
@@ -218,7 +218,7 @@ TmEcode ReceivePcapFileLoop(ThreadVars *tv, void *data, void *slot)
             }
             break;
         } else if (ptv->cb_result == TM_ECODE_FAILED) {
-            TempRaiseAlertHeuristic10();
+            //TempRaiseAlertHeuristic10();
             SCLogError(SC_ERR_PCAP_DISPATCH, "Pcap callback PcapFileCallbackLoop failed");
             if (! RunModeUnixSocketIsActive()) {
                 EngineKill();
