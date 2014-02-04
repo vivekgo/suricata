@@ -28,6 +28,7 @@
 
 #include<string.h>
 #include<stdlib.h>
+#include<stdio.h>
 
 #define NUM_INT_VAR 15
 #define NUM_STR_VAR 15
