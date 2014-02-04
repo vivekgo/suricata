@@ -42,7 +42,7 @@
 #include "flow-manager.h"
 #include "util-profiling.h"
 #include "runmode-unix-socket.h"
-#include "global-hashmap.h"
+#include "global-hashmap-redirection.h"
 
 #ifdef __SC_CUDA_SUPPORT__
 

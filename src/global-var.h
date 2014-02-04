@@ -18,20 +18,24 @@
 /**
  * \file
  * \author Vivek Goswami <vivekgoswami10@gmail.com>
+ *
+ * Support for global variables to be used in lua scripts
  */
 
 
 #ifndef __GLOBAL_VAR_H__
 #define __GLOBAL_VAR_H__
 
+#include<string.h>
+#include<stdlib.h>
 
 #define NUM_INT_VAR 15
 #define NUM_STR_VAR 15
 
-//Global Variable - Type int
+/* Global Variable Array(int) to support global variables in lua script */
 extern int globalInt[NUM_INT_VAR];
 
-//Global Variable - Type char*
+/* Global Variable Array(char*) to support global variables in lua script */
 extern char* globalStr[NUM_STR_VAR];
 
 void GlobalVarInit();

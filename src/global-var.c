@@ -20,37 +20,43 @@
  *
  * \author Vivek Goswami <vivekgoswami10@gmail.com>
  *
- * Global variable support for complex detection rules
+ * Global variables support for complex detection rules
  * Supported types atm are String and Integers
  */
 
 #include "global-var.h"
-#include<string.h>
-#include<stdlib.h>
-
 
 int globalInt[NUM_INT_VAR];
 char* globalStr[NUM_STR_VAR];
 
-//Called by suricata.c on startup
+/**
+ * /brief Initilializes array of global variables (int) globalInt to 0
+ * /note call to this function by suricata.c on startup
+ *
+ */
 void GlobalVarInit() {
-    //Initialize global variables of type int to 0 and assign memory for string variables of string type
     int i = 0;
-    for(i=0;i<NUM_INT_VAR;i++) {
+    for(i = 0; i < NUM_INT_VAR; i++) {
         globalInt[i] = 0;
     }
 }
 
+/**
+ * /brief Frees array of dynamically allocated global variables (string) globalStr
+ * /note call to this function by suricata.c just before engine shutdown
+ *
+ */
 void GlobalVarFree() {
      int i = 0;
-     for(i=0;i<NUM_STR_VAR;i++) {
+     for(i = 0; i < NUM_STR_VAR; i++) {
          free(globalStr[i]);
      }
 }
 
-/** GlobalIntGet returns the value of global integer variable for a valid index
-In case of invalid index, currently returning 0 - need to pack it in some struct to return NULL
-*/
+/** 
+ * /brief Returns the value of global integer variable for a valid index, otherwise returns 0
+ * 
+**/
 int GlobalIntGet(int idx) {
     if(idx >=0 && idx < NUM_INT_VAR)
         return globalInt[idx];
@@ -58,14 +64,21 @@ int GlobalIntGet(int idx) {
         return 0;
 }
 
+/** 
+ * /brief Returns the value of global string variable for a valid index, otherwise returns NULL
+ * 
+**/
 char* GlobalStrGet(int idx) {
     if(idx >=0 && idx < NUM_STR_VAR)
          return globalStr[idx];
     else
-         return "null";
+         return NULL;
 }
 
-// 1 on success and 0 on failure
+/** 
+ * /brief Sets the value of global integer variable for a valid index, returns 1 on success 0 on failure
+ * 
+**/
 int GlobalIntSet(int idx, int value) {
     if(idx >=0 && idx < NUM_INT_VAR) {
         globalInt[idx] = value;
@@ -75,17 +88,30 @@ int GlobalIntSet(int idx, int value) {
         return 0;
 }
 
+/** 
+ * /brief Sets the value of global string variable for a valid index, returns 1 on success 0 on failure
+ *  
+**/
 int GlobalStrSet(int idx, char* value) {
     if(idx >=0 && idx < NUM_STR_VAR) {
         globalStr[idx] = (char*)malloc((strlen(value))*sizeof(char));
-        strncpy(globalStr[idx],value,strlen(value));
-        //printf("Allocated memory for string \n");
-        return 1;
+        if(globalStr[idx]) {
+            strncpy(globalStr[idx],value,strlen(value));
+            return 1;
+        }
+        else {
+            printf("Error: global-var.c GlobalStrSet() : malloc error \n");
+            return 0;
+        }
     }
     else
         return 0;
 }
 
+/** 
+ * /brief Frees dynamincally allocated memory for a particular element(index parameter) in array of global variable (string) 
+ *  
+**/
 void GlobalStrFree(int idx) {
     free(globalStr[idx]);
     globalStr[idx] = NULL;

@@ -61,7 +61,8 @@
 
 //Vivek
 #include "global-var.h"
-#include "global-hashmap.h"
+#include "global-hashmap-redirection.h"
+#include "global-hashmap-repetition.h"
 
 #ifdef HAVE_LUAJIT
 
@@ -145,12 +146,6 @@ static int LuajitGetGlobalStrvar(lua_State *luastate) {
        return 2;
     }
     
-    if(!strcmp(globalstrvar,"null")) {
-        lua_pushnil(luastate);
-        lua_pushstring(luastate, "global string var uninitialized");
-        return 2;
-    }    
-
     /* we're using a buffer sized at a multiple of 4 as lua_pushlstring generates
      * invalid read errors in valgrind otherwise. Adding in a nul to be sure.
      *
