@@ -13,7 +13,7 @@
  * version 2 along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
- */
+ *
 
 /**
  * \file
@@ -47,7 +47,7 @@ int find_dst_ip_In_BF_DSTIP(char* srcIp, char* dstIp) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-         printf("Error: global-hashmap.c - find_dst_ip_In_BF_DSTIP - Application Level should ensure that srcIP is present as key.\n");
+         printf("Error: global-hashmap-repetition.c - find_dst_ip_In_BF_DSTIP - Application Level should ensure that srcIP is present as key.\n");
          return -1;
      }
      else {
@@ -67,7 +67,7 @@ int find_uri_In_BF_URI(char* srcIp, char* uri) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-         printf("Error: global-hashmap.c - find_uri_In_BF_URI - Application Level should ensure that srcIP is present as a key.\n");
+         printf("Error: global-hashmap-repetition.c - find_uri_In_BF_URI - Application Level should ensure that srcIP is present as a key.\n");
          return -1;
      }
      else {
@@ -87,7 +87,7 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-         printf("Error: global-hashmap.c - find_pair_In_BF_PAIR_DSTIP_URI - Application Level should ensure that srcIP is present as a key.\n");
+         printf("Error: global-hashmap-repetition.c - find_pair_In_BF_PAIR_DSTIP_URI - Application Level should ensure that srcIP is present as a key.\n");
          return -1;
      }
      else {
@@ -106,7 +106,7 @@ int find_pair_In_BF_PAIR_DSTIP_URI(char* srcIp, char* dstIp, char* uri) {
             free(pair_str);
         }
         else {
-            printf("Error: global-hashmap.c - find_pair_In_BF_PAIR_DSTIP_URI  : malloc error\n");
+            printf("Error: global-hashmap-repetition.c - find_pair_In_BF_PAIR_DSTIP_URI  : malloc error\n");
             return -1;
         }
      }
@@ -143,12 +143,12 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri) {
                     return 0;
             }
             else {
-                printf("Error: global-hashmap.c - add_to_both_BF() :malloc error \n");
+                printf("Error: global-hashmap-repetition.c - add_to_both_BF() :malloc error \n");
                 return 0;
             }
         }
         else {
-            printf("Error: global-hashmap.c - add_to_both_BF() : malloc error \n");
+            printf("Error: global-hashmap-repetition.c - add_to_both_BF() : malloc error \n");
             return 0;
         }
     }
@@ -181,10 +181,10 @@ void add_to_pairBF(char* srcIp, char* dstIp, char* uri) {
             free(pair_str);
         }
         else 
-            printf("Error: global-hashmap.c - add_to_pairBF : malloc error \n");
+            printf("Error: global-hashmap-repetition.c - add_to_pairBF : malloc error \n");
     }
     else 
-        printf("Error: global-hashmap.c - add_to_pairBF - Application Level should guarantee that srcIp is present as a key already. \n");
+        printf("Error: global-hashmap-repetition.c - add_to_pairBF - Application Level should guarantee that srcIp is present as a key already. \n");
 }
 
 /**
@@ -199,7 +199,7 @@ void add_to_BF_DSTIP(char* srcIp, char* dstIp) {
         map->bf_ip_count = map->bf_ip_count + 1;
     }
     else
-        printf("Error: global-hashmap.c - add_to_BF_DSTIP - Application Level should guarantee that srcIp is present as a key already. \n");
+        printf("Error: global-hashmap-repetition.c - add_to_BF_DSTIP - Application Level should guarantee that srcIp is present as a key already. \n");
 }
 
 /**
@@ -214,7 +214,7 @@ void add_to_BF_URI(char* srcIp, char* uri){
         map->bf_uri_count = map->bf_uri_count + 1;
     }
     else
-        printf("Error: global-hashmap.c - add_to_BF_URI - Application Level should guarantee that srcIp is present as a key already. \n");
+        printf("Error: global-hashmaprepetition.c - add_to_BF_URI - Application Level should guarantee that srcIp is present as a key already. \n");
 }
 
 /**
@@ -231,13 +231,13 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
         if(!new_item) {
             new_item = (adhocHashMapURI*)malloc(sizeof(adhocHashMapURI));
             if(!new_item) {
-                 printf("Error: global-hashmap.c update_URI_List : malloc error \n");
+                 printf("Error: global-hashmap-repetition.c update_URI_List : malloc error \n");
                  return -1;
             }
             else {
                 new_item->uri_key = (char*)malloc(strlen(uri)*sizeof(char));
                 if(!new_item->uri_key) {
-                    printf("Error: global-hashmap.c update_URI_List : malloc error \n");
+                    printf("Error: global-hashmap-repetition.c update_URI_List : malloc error \n");
                     return -1;
                 }
                 else {
@@ -250,7 +250,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
                         strncpy(new_item->host[0],host,host_len);
                     }
                     else {
-                        printf("Error: global-hashmap.c update_URI_List : malloc error\n");
+                        printf("Error: global-hashmap-repetition.c update_URI_List : malloc error\n");
                         return -1;
                     }
                     HASH_ADD_KEYPTR(hh1,map->URI_LIST,new_item->uri_key,strlen(uri),new_item);
@@ -276,7 +276,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
                     strncpy(new_item->host[count],host,host_len);
                 }
                 else {
-                    printf("Error: global-hashmap.c update_URI_List : malloc error \n");
+                    printf("Error: global-hashmap-repetition.c update_URI_List : malloc error \n");
                     return -1;
                 }
                 count++;
@@ -286,7 +286,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
         }
     }
     else {
-        printf("Error:  global-hashmap.c update_URI_List : Application Level should guarantee presence of srcIP as key. \n");
+        printf("Error:  global-hashmap-repetition.c update_URI_List : Application Level should guarantee presence of srcIP as key. \n");
         return -1;
     }
 }
@@ -299,14 +299,14 @@ int get_ipcount_from_URI_List(char* srcIp, char* uri) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-        printf("-Error: global-hashmap.c - get_ipcount_from_URI_List : Application level should guarantee srcIP is present as a key. \n");
+        printf("-Error: global-hashmap-repetition.c - get_ipcount_from_URI_List : Application level should guarantee srcIP is present as a key. \n");
         return -1;
      }
      else {
          adhocHashMapURI* urimap = NULL;
          HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
          if(!urimap) {
-             printf("Error: global-hashmap.c - get_ipcount_from_URI_List : Application level should guarantee uri is present as a key. \n");
+             printf("Error: global-hashmap-repetition.c - get_ipcount_from_URI_List : Application level should guarantee uri is present as a key. \n");
              return -1;
          }
          else
@@ -323,14 +323,14 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-	printf("Error: global-hashmap.c - get_info_from_URI_List : Application level should guarantee srcIP is present as a key. \n");
+	printf("Error: global-hashmap-repetition.c - get_info_from_URI_List : Application level should guarantee srcIP is present as a key. \n");
         return NULL;
      }
      else {
          adhocHashMapURI* urimap = NULL;
          HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
          if(!urimap) {
-             printf("Error: global-hashmap.c - get_info_from_URI_List : Application level should guarantee uri is present as a key. \n");
+             printf("Error: global-hashmap-repetition.c - get_info_from_URI_List : Application level should guarantee uri is present as a key. \n");
              return NULL;
          }
          else {
@@ -356,13 +356,13 @@ void log_info_from_URI_List(char* srcIp, char* uri) {
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
-        printf("Error: global-hashmap.c log_info_from_URI_List() : Application level should guarantee srcIP is present as a key. \n");
+        printf("Error: global-hashmap-repetition.c log_info_from_URI_List() : Application level should guarantee srcIP is present as a key. \n");
      }
      else {
          adhocHashMapURI* urimap = NULL;
          HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
          if(!urimap) {
-             printf("Error: global-hashmap.c log_info_from_URI_List() : Application level should guarantee uri is present as a key. \n");
+             printf("Error: global-hashmap-repetition.c log_info_from_URI_List() : Application level should guarantee uri is present as a key. \n");
          }
          else {
              int i;

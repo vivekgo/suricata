@@ -68,14 +68,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         if(!locationmap) {
             locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
             if(!locationmap) {
-                printf("Error: global-hashmap.c add_location_redirectsHashMap : malloc error \n");
+                printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
             }
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
                 locationmap->dstIp = (char*)malloc(7*sizeof(char));
                 locationmap->type_redirect = (char*)malloc(3*sizeof(char));
                 if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
-                    printf("Error: global-hashmap.c add_location_redirectsHashMap : malloc error \n");
+                    printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
                 }
                 else {
                     strncpy(locationmap->location_key,location,location_len);
@@ -91,14 +91,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         map = (redirectsHashMap*)malloc(sizeof(redirectsHashMap));
         locationmap = (locationHashMap*)malloc(sizeof(locationHashMap));
         if(map == NULL || locationmap == NULL) {
-            printf("Error: global-hashmap.c add_location_redirectsHashMap : malloc error \n");
+            printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
         }
         else {
             locationmap->location_key = (char*)malloc(location_len*sizeof(char));
             locationmap->dstIp = (char*)malloc(7*sizeof(char));
             locationmap->type_redirect = (char*)malloc(3*sizeof(char));
             if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
-                    printf("Error: global-hashmap.c add_location_redirectsHashMap : malloc error \n");
+                    printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
             }
             else {
                 strncpy(locationmap->location_key,location,location_len);
