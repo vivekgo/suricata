@@ -56,7 +56,7 @@ typedef struct {
  * bf_ip_count(Number of entries in BF_DST_IP), bf_uri_count(Number of entries in BF_URI), bf_pair_count(Number of entries in BF_PAIR_DSTIP_URI)
  */
 typedef struct {
-    char srcip_key[7];
+    char srcip_key[8];
     BloomFilter* BF_PAIR_DSTIP_URI;
     BloomFilter* BF_DST_IP;
     BloomFilter* BF_URI;
