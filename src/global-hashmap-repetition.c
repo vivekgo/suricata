@@ -122,7 +122,7 @@ int add_to_both_BF(char* srcIp, char* dstIp, char* uri) {
     if(map == NULL) {
         map = (adhocHashMap*)malloc(sizeof(adhocHashMap));
         if(map) {
-            strncpy(map->srcip_key,srcIp,7);
+            strncpy(map->srcip_key,srcIp,8);
 	    map->BF_DST_IP = (BloomFilter*)malloc(sizeof(BloomFilter));
             map->BF_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
             map->BF_PAIR_DSTIP_URI = (BloomFilter*)malloc(sizeof(BloomFilter));
