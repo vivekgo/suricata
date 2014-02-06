@@ -200,7 +200,7 @@ void delete_record_redirectsHashMap(char* srcIp) {
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp) {
             HASH_DELETE(hh3,map->LocationMap,locationmap);
-            free(locationmap);
+            //free(locationmap);
         }
         HASH_DELETE(hh2,RedirectsMap,map);
         free(map);
