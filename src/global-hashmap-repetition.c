@@ -263,7 +263,7 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
             int count = new_item->count;
             int ip_or_host_already_present = 0;
             for(i = 0; i < count; i++) {
-                if((strncmp(dstIp,new_item->ip[i],7)==0) || (strncmp(host,new_item->host[i],strlen(host)==0)) ) {
+                if((strncmp(dstIp,new_item->ip[i],7)==0) || (strncmp(host,new_item->host[i],strlen(host))==0) ) {
                     ip_or_host_already_present = 1;
                     break;
                 }
