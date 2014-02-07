@@ -261,14 +261,14 @@ int update_URI_List(char* srcIp, char* dstIp, char* uri,char* host) {
         else {
             int i = 0;
             int count = new_item->count;
-            int ip_already_present = 0;
+            int ip_or_host_already_present = 0;
             for(i = 0; i < count; i++) {
-                if(!(strncmp(dstIp,new_item->ip[i],7))) {
-                    ip_already_present = 1;
+                if((strncmp(dstIp,new_item->ip[i],7)==0) || (strncmp(host,new_item->host[i],strlen(host)==0)) ) {
+                    ip_or_host_already_present = 1;
                     break;
                 }
             }
-            if(!ip_already_present) {
+            if(!ip_or_host_already_present) {
                 new_item->ip[count] = (char*)malloc(7*sizeof(char));
                 new_item->host[count] = (char*)malloc(host_len*sizeof(char));
                 if(new_item->ip[count] != NULL && new_item->host[count] != NULL) {
