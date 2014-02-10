@@ -126,21 +126,23 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold) {
     HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp) {
-            locationmap->count = locationmap->count + 1;
-            if(locationmap->count > threshold) {
-               printf("Alert_13: Redirection SrcIp: %hhu.%hhu.%hhu.%hhu Location: %s Type: %s \n",srcIp[0],srcIp[2],srcIp[4],srcIp[6],locationmap->location_key, locationmap->type_redirect);
-               HASH_DELETE(hh3,map->LocationMap,locationmap);
-               printf("Before Free : increase_locationcount_redirectsHashMap \n");
-                if(locationmap->location_key)
-                   free(locationmap->location_key);
-               if(locationmap->dstIp)
-                   free(locationmap->dstIp);
-               if(locationmap->type_redirect)
-                   free(locationmap->type_redirect);
-               if(locationmap)
-                   free(locationmap);
-               printf("After Free : increase_locationcount_redirectsHashMap \n");
-                count++;
+            if(locationmap) {
+                locationmap->count = locationmap->count + 1;
+                if(locationmap->count > threshold) {
+                    printf("Alert_13: Redirection SrcIp: %hhu.%hhu.%hhu.%hhu Location: %s Type: %s \n",srcIp[0],srcIp[2],srcIp[4],srcIp[6],locationmap->location_key, locationmap->type_redirect);
+                    HASH_DELETE(hh3,map->LocationMap,locationmap);
+                    printf("Before Free : increase_locationcount_redirectsHashMap \n");
+                    if(locationmap->location_key)
+                        free(locationmap->location_key);
+                    if(locationmap->dstIp)
+                        free(locationmap->dstIp);
+                    if(locationmap->type_redirect)
+                        free(locationmap->type_redirect);
+                    if(locationmap)
+                        free(locationmap);
+                    printf("After Free : increase_locationcount_redirectsHashMap \n");
+                    count++;
+                }
             }
         }
         return count;
@@ -217,6 +219,7 @@ void delete_record_redirectsHashMap(char* srcIp) {
     HASH_FIND(hh2,RedirectsMap, srcIp, 7, map);
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp) {
+            if(locationmap){
             HASH_DELETE(hh3,map->LocationMap,locationmap);
                if(locationmap->location_key)
                    free(locationmap->location_key);
@@ -226,6 +229,7 @@ void delete_record_redirectsHashMap(char* srcIp) {
                    free(locationmap->type_redirect);
                if(locationmap)
                    free(locationmap);
+            }
         }
         HASH_DELETE(hh2,RedirectsMap,map);
         printf("Before Free : delete_record_redirectsHashMap\n");
