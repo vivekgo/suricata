@@ -401,7 +401,14 @@ void refresh_bloomfilters(char* srcIp, double threshold) {
             map->BF_URI = BloomFilterInit(256*1024,10,BloomFilterHashFn);
             adhocHashMapURI *urimap, *tmp;
             HASH_ITER(hh1,map->URI_LIST,urimap,tmp) {
+                int i =0;
+                int count = urimap->count;
                 HASH_DELETE(hh1,map->URI_LIST,urimap);
+                free(urimap->uri_key);
+                for(i=0;i<count;i++) {
+                    free(urimap->ip[i]);
+                    free(urimap->host[i]);
+                }
                 free(urimap);
             }
             free(map->URI_LIST);
@@ -426,7 +433,14 @@ void remove_uri_from_URI_List(char* srcIp, char* uri) {
     if(map) {
         HASH_FIND(hh1,map->URI_LIST,uri,strlen(uri),urimap);
         if(urimap) {
+            int i =0;
+            int count = urimap->count;
             HASH_DELETE(hh1,map->URI_LIST,urimap);
+            free(urimap->uri_key);
+                for(i=0;i<count;i++) {
+                    free(urimap->ip[i]);
+                    free(urimap->host[i]);
+                }
             free(urimap);
         }
     }
@@ -440,14 +454,23 @@ void delete_record(char* srcIp) {
     adhocHashMap* map = NULL;
     HASH_FIND_STR(IP_BFS,srcIp,map);
     if(map) {
+        BloomFilterFree(map->BF_PAIR_DSTIP_URI);
         BloomFilterFree(map->BF_DST_IP);
         BloomFilterFree(map->BF_URI);
         adhocHashMapURI *urimap, *tmp;
         HASH_ITER(hh1,map->URI_LIST,urimap,tmp) {
+            int i =0;
+            int count = urimap->count;
             HASH_DELETE(hh1,map->URI_LIST,urimap);
+            free(urimap->uri_key);
+                for(i=0;i<count;i++) {
+                    free(urimap->ip[i]);
+                    free(urimap->host[i]);
+                }
             free(urimap);
         }
         HASH_DEL(IP_BFS,map);
+        free(map->URI_LIST);
         free(map);
     }
 }
