@@ -217,7 +217,7 @@ void delete_record_redirectsHashMap(char* srcIp) {
         }
         HASH_DELETE(hh2,RedirectsMap,map);
         printf("Before Free : delete_record_redirectsHashMap\n");
-        free(map->Locationmap);
+        free(map->LocationMap);
         free(map);
         printf("After Free : delete_record_redirectsHashMap \n");
     }
