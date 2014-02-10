@@ -52,7 +52,7 @@ typedef struct {
  * Value: locationHashMap
  */
 typedef struct {
-    char srcip_key[7]; 
+    char srcip_key[8]; 
     locationHashMap* LocationMap;
     UT_hash_handle hh2;
 } redirectsHashMap;

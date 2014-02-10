@@ -33,7 +33,7 @@ redirectsHashMap* RedirectsMap = NULL;
   */
 int find_key_redirectsHashMap(char* srcIp) {
     redirectsHashMap* map = NULL;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     return map ? 1 : 0 ;	
 }
 
@@ -44,7 +44,7 @@ int find_key_redirectsHashMap(char* srcIp) {
   */
 int find_location_redirectsHashMap(char* srcIp, char* location) {
     redirectsHashMap* map = NULL;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map) {
         locationHashMap* locationmap = NULL;
         HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
@@ -62,7 +62,7 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
     redirectsHashMap* map = NULL;
     locationHashMap* locationmap = NULL;
     int location_len = strlen(location);
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map) {
         HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
         if(!locationmap) {
@@ -72,14 +72,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
             }
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
-                locationmap->dstIp = (char*)malloc(7*sizeof(char));
+                locationmap->dstIp = (char*)malloc(8*sizeof(char));
                 locationmap->type_redirect = (char*)malloc(4*sizeof(char));
                 if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
                     printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
                 }
                 else {
                     strncpy(locationmap->location_key,location,location_len);
-                    strncpy(locationmap->dstIp,dstIp,7);
+                    strncpy(locationmap->dstIp,dstIp,8);
                     strncpy(locationmap->type_redirect,redirectType,4);
                     locationmap->count = 0;
                     HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
@@ -95,19 +95,19 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         }
         else {
             locationmap->location_key = (char*)malloc(location_len*sizeof(char));
-            locationmap->dstIp = (char*)malloc(7*sizeof(char));
+            locationmap->dstIp = (char*)malloc(8*sizeof(char));
             locationmap->type_redirect = (char*)malloc(4*sizeof(char));
             if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
                     printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
             }
             else {
                 strncpy(locationmap->location_key,location,location_len);
-                strncpy(locationmap->dstIp,dstIp,7);
+                strncpy(locationmap->dstIp,dstIp,8);
                 strncpy(locationmap->type_redirect,redirectType,4);
                 locationmap->count = 0;
-                strncpy(map->srcip_key,srcIp,7);
+                strncpy(map->srcip_key,srcIp,8);
                 map->LocationMap = NULL;
-                HASH_ADD(hh2,RedirectsMap,srcip_key,7,map);
+                HASH_ADD(hh2,RedirectsMap,srcip_key,8,map);
                 HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
             }
         }
@@ -123,7 +123,7 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold) {
     redirectsHashMap* map = NULL;
     locationHashMap *locationmap, *tmp;
     int count = 0;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp) {
             if(locationmap) {
@@ -157,7 +157,7 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold) {
   */
 int get_redirectcount_redirectsHashMap(char* srcIp) {
     redirectsHashMap* map = NULL;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map)
         return HASH_CNT(hh3,map->LocationMap);
     else
@@ -171,7 +171,7 @@ int get_redirectcount_redirectsHashMap(char* srcIp) {
 int get_count_location_redirectsHashMap(char* srcIp, char* location) {
     redirectsHashMap* map = NULL;
     locationHashMap* locationmap = NULL;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map) {
     	HASH_FIND(hh3,map->LocationMap,location,strlen(location),locationmap);
         if(locationmap)
@@ -190,7 +190,7 @@ int get_count_location_redirectsHashMap(char* srcIp, char* location) {
 void remove_location_redirectsHashMap(char* srcIp, char* location) {
     redirectsHashMap* map = NULL;
     locationHashMap* locationmap = NULL;
-    HASH_FIND(hh2,RedirectsMap,srcIp,7,map);
+    HASH_FIND(hh2,RedirectsMap,srcIp,8,map);
     if(map) {
         HASH_FIND(hh3,map->LocationMap, location, strlen(location),locationmap);
         if(locationmap) {
@@ -216,7 +216,7 @@ void remove_location_redirectsHashMap(char* srcIp, char* location) {
 void delete_record_redirectsHashMap(char* srcIp) {
     redirectsHashMap* map = NULL;
     locationHashMap *locationmap, *tmp;
-    HASH_FIND(hh2,RedirectsMap, srcIp, 7, map);
+    HASH_FIND(hh2,RedirectsMap, srcIp, 8, map);
     if(map) {
         HASH_ITER(hh3,map->LocationMap, locationmap,tmp) {
             if(locationmap){
