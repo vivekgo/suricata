@@ -80,7 +80,7 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
                 else {
                     strncpy(locationmap->location_key,location,location_len);
                     strncpy(locationmap->dstIp,dstIp,7);
-                    strncpy(locationmap->type_redirect,redirectType,3);
+                    sAfter(locationmap->type_redirect,redirectType,3);
                     locationmap->count = 0;
                     HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 }
@@ -130,8 +130,10 @@ int increase_locationcount_redirectsHashMap(char* srcIp, int threshold) {
             if(locationmap->count > threshold) {
                printf("Alert_13: Redirection SrcIp: %hhu.%hhu.%hhu.%hhu Location: %s Type: %s \n",srcIp[0],srcIp[2],srcIp[4],srcIp[6],locationmap->location_key, locationmap->type_redirect);
                HASH_DELETE(hh3,map->LocationMap,locationmap);
+               printf("Before Free : increase_locationcount_redirectsHashMap \n");
                free(locationmap);
-               count++;
+               printf("After Free : increase_locationcount_redirectsHashMap \n");
+                count++;
             }
         }
         return count;
@@ -184,7 +186,9 @@ void remove_location_redirectsHashMap(char* srcIp, char* location) {
         HASH_FIND(hh3,map->LocationMap, location, strlen(location),locationmap);
         if(locationmap) {
         	HASH_DELETE(hh3,map->LocationMap,locationmap);
-                free(locationmap);
+                printf("Before Free : remove_location_redirectsHashMap\n");
+                 free(locationmap);
+                printf("After Free : remove_location_redirectsHashMap\n");
         }
     }
 }
@@ -203,7 +207,9 @@ void delete_record_redirectsHashMap(char* srcIp) {
             //free(locationmap);
         }
         HASH_DELETE(hh2,RedirectsMap,map);
+        printf("Before Free : delete_record_redirectsHashMap\n");
         free(map);
+        printf("After Free : delete_record_redirectsHashMap \n");
     }
 }
 
