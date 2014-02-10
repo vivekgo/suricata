@@ -73,14 +73,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
             else {
                 locationmap->location_key = (char*)malloc(location_len*sizeof(char));
                 locationmap->dstIp = (char*)malloc(7*sizeof(char));
-                locationmap->type_redirect = (char*)malloc(3*sizeof(char));
+                locationmap->type_redirect = (char*)malloc(4*sizeof(char));
                 if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
                     printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
                 }
                 else {
                     strncpy(locationmap->location_key,location,location_len);
                     strncpy(locationmap->dstIp,dstIp,7);
-                    sAfter(locationmap->type_redirect,redirectType,3);
+                    strncpy(locationmap->type_redirect,redirectType,4);
                     locationmap->count = 0;
                     HASH_ADD_KEYPTR(hh3,map->LocationMap,locationmap->location_key,location_len,locationmap);
                 }
@@ -96,14 +96,14 @@ void add_location_redirectsHashMap(char* srcIp, char* dstIp, char* location, cha
         else {
             locationmap->location_key = (char*)malloc(location_len*sizeof(char));
             locationmap->dstIp = (char*)malloc(7*sizeof(char));
-            locationmap->type_redirect = (char*)malloc(3*sizeof(char));
+            locationmap->type_redirect = (char*)malloc(4*sizeof(char));
             if(locationmap->location_key == NULL || locationmap->type_redirect == NULL || locationmap->dstIp == NULL) {
                     printf("Error: global-hashmap-redirection.c add_location_redirectsHashMap : malloc error \n");
             }
             else {
                 strncpy(locationmap->location_key,location,location_len);
                 strncpy(locationmap->dstIp,dstIp,7);
-                strncpy(locationmap->type_redirect,redirectType,3);
+                strncpy(locationmap->type_redirect,redirectType,4);
                 locationmap->count = 0;
                 strncpy(map->srcip_key,srcIp,7);
                 map->LocationMap = NULL;
