@@ -63,6 +63,7 @@
 #include "global-var.h"
 #include "global-hashmap-redirection.h"
 #include "global-hashmap-repetition.h"
+#include "global-bloomfilter.h"
 
 #ifdef HAVE_LUAJIT
 
@@ -2166,11 +2167,105 @@ static int LuajitRedirectHashMapDeleteRecord(lua_State *luastate) {
     return 1;
 }
 
+/**
+  * LuajitExtensions for globalBloomFilter functions
+ */
 
+static int LuajitGlobalBloomFilterAdd(lua_State *luastate) {
+    char* host;
+    DetectLuajitData *ld;
 
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
 
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    host = lua_tostring(luastate, 1);
+    if (host == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
 
+    add_to_globalBloomFilter(host);
 
+    return 1;
+}
+
+static int LuajitGlobalBloomFilterTest(lua_State *luastate) {
+    char* host;
+    DetectLuajitData *ld;
+    int found;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    host = lua_tostring(luastate, 1);
+    if (host == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    found = present_in_globalBloomFilter(host);
+    lua_pushnumber(luastate, (lua_Number)found);
+
+    return 1;
+}
+
+static int LuajitGlobalBloomFilterRefresh(lua_State *luastate) {
+    DetectLuajitData *ld;
+    double threshold;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+    
+    if (!lua_isnumber(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a number");
+        return 2;
+    }
+    threshold = lua_tonumber(luastate, 1);
+
+    refresh_globalBloomFilter(threshold);
+
+    return 1;
+}
 
 void LuajitExtensionsMatchSetup(lua_State *lua_state, DetectLuajitData *ld, DetectEngineThreadCtx *det_ctx, Flow *f, int need_flow_lock) {
     SCLogDebug("det_ctx %p, f %p", det_ctx, f);
@@ -2233,6 +2328,20 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitFreeGlobalStrvar);
     lua_setglobal(lua_state, "ScGlobalStrFree");
+
+
+    /**
+      * LuajitExtensions for Functions(globalBloomFilter)
+     */
+    lua_pushcfunction(lua_state, LuajitGlobalBloomFilterAdd);
+    lua_setglobal(lua_state, "ScGlobalBloomFilterAdd");
+
+    lua_pushcfunction(lua_state, LuajitGlobalBloomFilterTest);
+    lua_setglobal(lua_state, "ScGlobalBloomFilterTest");
+
+    lua_pushcfunction(lua_state, LuajitGlobalBloomFilterRefresh);
+    lua_setglobal(lua_state, "ScGlobalBloomFilterRefresh");
+
 
     /*
     LuajitExtensions for Functions(GlobalHashMap) 

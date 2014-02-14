@@ -199,6 +199,7 @@ flow-storage.c flow-storage.h \
 flow-timeout.c flow-timeout.h \
 flow-util.c flow-util.h \
 flow-var.c flow-var.h \
+global-bloomfilter.c global-bloomfilter.h \
 global-hashmap-redirection.c global-hashmap-redirection.h \
 global-hashmap-repetition.c global-hashmap-repetition.h \
 global-var.c global-var.h \
