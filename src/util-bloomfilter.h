@@ -24,6 +24,8 @@
 #ifndef __BLOOMFILTER_H__
 #define __BLOOMFILTER_H__
 
+#include<stdint.h>
+
 /* Bloom Filter structure */
 typedef struct BloomFilter_ {
     uint8_t hash_iterations;
