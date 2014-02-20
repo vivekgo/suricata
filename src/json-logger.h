@@ -2,7 +2,7 @@
 #include<string.h>
 #include<malloc.h>
 #include "zlog.h"
-#include "jannson.h"
+#include "/usr/local/include/jannson.h"
 
 int log_alert(char*, char*, char*, char*, char*, char*, char*);
 int log_error(char*, char*);
