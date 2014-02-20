@@ -72,7 +72,7 @@
     CFLAGS="$CFLAGS -Wall -fno-strict-aliasing"
     CFLAGS="$CFLAGS -Wno-unused-parameter"
     CFLAGS="$CFLAGS -std=gnu99"
-    CFLAGS="$CFLAGS -L/usr/local/lib -lzlog -lpthread -ljansson"
+    CFLAGS="$CFLAGS -I/usr/local/include -L/usr/local/lib -lzlog -lpthread -ljansson"
 
     # Checks for programs.
     AC_PROG_AWK
