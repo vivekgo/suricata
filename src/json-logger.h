@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<string.h>
 #include<malloc.h>
+#include<jansson.h>
 #include "zlog.h"
 
 int log_alert(char*, char*, char*, char*, char*, char*, char*);
