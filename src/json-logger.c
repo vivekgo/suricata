@@ -13,13 +13,22 @@ int log_alert(char* ts, char* hId, char* srcip, char* dstip, char* host, char* u
             printf("Error: json_logger.c : zlog_init failed \n");
             return -1;
         }
+        else {
+            c = zlog_get_category("alert_cat");
+            if (!c) {
+                printf("Error: json_logger.c : zlog_get_category failed \n");
+                zlog_fini();
+                return -1;
+            }
+        }
     }
-
-    c = zlog_get_category("alert_cat");
-    if (!c) {
-        printf("Error: json_logger.c : zlog_get_category failed \n");
-        zlog_fini();
-        return -1;
+    else {
+        c = zlog_get_category("alert_cat");
+        if (!c) {
+            printf("Error: json_logger.c : zlog_get_category failed \n");
+            zlog_fini();
+            return -1;
+        }
     }
 
     json_t *json, *json_info;
@@ -80,20 +89,32 @@ json_t* get_json_info(char* info) {
 
 
 int log_error(char* ts, char* info) {
-    int rc;
+    int rc,rc_t;
     zlog_category_t *c;
 
     rc = zlog_init("/etc/zlog.conf");
     if (rc) {
-        printf("Error: json_logger.c : zlog_init failed \n");
-        return -1;
+        rc_t = zlog_reload("/etc/zlog.conf");
+        if(rc_t) {
+            printf("Error: json_logger.c : zlog_init failed \n");
+            return -1;
+        }
+        else {
+            c = zlog_get_category("alert_cat");
+            if (!c) {
+                printf("Error: json_logger.c : zlog_get_category failed \n");
+                zlog_fini();
+                return -1;
+            }
+        }
     }
-
-    c = zlog_get_category("error_cat");
-    if (!c) {
-        printf("Error: json_logger.c : zlog_get_category failed \n");
-        zlog_fini();
-        return -1;
+    else {
+        c = zlog_get_category("alert_cat");
+        if (!c) {
+            printf("Error: json_logger.c : zlog_get_category failed \n");
+            zlog_fini();
+            return -1;
+        }
     }
 
     json_t *json, *json_info;
