@@ -1497,6 +1497,12 @@
         fi
     fi
 
+  #jansson
+    PKG_CHECK_MODULES([JANSSON], [jansson])
+    CPPFLAGS="${CPPFLAGS} ${JANSSON_CFLAGS}"
+    LIBS="${LIBS} ${JANSSON_LIBS}"
+
+
   # libgeoip
     AC_ARG_ENABLE(geoip,
 	        AS_HELP_STRING([--enable-geoip],[Enable GeoIP support]),
