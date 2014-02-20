@@ -72,7 +72,6 @@
     CFLAGS="$CFLAGS -Wall -fno-strict-aliasing"
     CFLAGS="$CFLAGS -Wno-unused-parameter"
     CFLAGS="$CFLAGS -std=gnu99"
-    CFLAGS="$CFLAGS -I/usr/local/include -L/usr/local/lib -lzlog -lpthread -ljansson"
 
     # Checks for programs.
     AC_PROG_AWK
@@ -185,32 +184,32 @@
     case "$host" in
         *-*-*freebsd*)
             CFLAGS="${CFLAGS} -DOS_FREEBSD"
-            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet11"
-            LDFLAGS="${LDFLAGS} -L/usr/local/lib -L/usr/local/lib/libnet11"
+            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet11 -I/usr/local/include"
+            LDFLAGS="${LDFLAGS} -L/usr/local/lib -L/usr/local/lib/libnet11 -lzlog -lpthread -ljansson"
             e_magic_file="/usr/share/misc/magic"
             ;;
         *-*-openbsd5.1)
             CFLAGS="${CFLAGS} -D__OpenBSD__ -fgnu89-inline"
-            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1"
-            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1"
+            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1 -I/usr/local/include"
+            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1 -lzlog -lpthread -ljansson"
             e_magic_file="/usr/local/share/misc/magic.mgc"
             ;;
         *-*-openbsd5.2)
             CFLAGS="${CFLAGS} -D__OpenBSD__"
-            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1"
-            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1"
+            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1 -I/usr/local/include"
+            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1 -lzlog -lpthread -ljansson"
             e_magic_file="/usr/local/share/misc/magic.mgc"
             ;;
         *-*-openbsd*)
             CFLAGS="${CFLAGS} -D__OpenBSD__ -fgnu89-inline"
-            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1"
-            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1"
+            CPPFLAGS="${CPPFLAGS} -I/usr/local/include -I/usr/local/include/libnet-1.1 -I/usr/local/include"
+            LDFLAGS="${LDFLAGS} -L/usr/local/lib -I/usr/local/lib/libnet-1.1 -lzlog -lpthread -ljansson"
             e_magic_file="/usr/local/share/file/magic.mgc"
             ;;
         *darwin*|*Darwin*)
             CFLAGS="${CFLAGS} -DOS_DARWIN"
-            CPPFLAGS="${CPPFLAGS} -I/opt/local/include"
-            LDFLAGS="${LDFLAGS} -L/opt/local/lib"
+            CPPFLAGS="${CPPFLAGS} -I/opt/local/include -I/usr/local/include"
+            LDFLAGS="${LDFLAGS} -L/opt/local/lib -lzlog -lpthread -ljansson"
             ;;
         *-*-linux*)
             #for now do nothing
