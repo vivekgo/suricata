@@ -208,6 +208,7 @@ host-queue.c host-queue.h \
 host-storage.c host-storage.h \
 host-timeout.c host-timeout.h \
 hash-functions.c hash-functions.h \
+json-logger.c json-logger.h \
 log-dnslog.c log-dnslog.h \
 log-droplog.c log-droplog.h \
 log-file.c log-file.h \
@@ -354,7 +355,7 @@ util-var-name.c util-var-name.h \
 util-vector.h \
 win32-misc.c win32-misc.h \
 win32-service.c win32-service.h \
-win32-syslog.h
+win32-syslog.h 
 
 EXTRA_DIST = util-mpm-ac-cuda-kernel.cu ptxdump.py
 

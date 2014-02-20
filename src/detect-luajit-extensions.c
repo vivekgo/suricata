@@ -64,6 +64,7 @@
 #include "global-hashmap-redirection.h"
 #include "global-hashmap-repetition.h"
 #include "global-bloomfilter.h"
+#include "json-logger.h"
 
 #ifdef HAVE_LUAJIT
 
@@ -891,6 +892,164 @@ static int LuajitDecrFlowint(lua_State *luastate) {
 
     return 1;
 
+}
+
+/* Functions - zlog_logger
+LuajitLogAlert
+LuajitLogError
+*/
+static int LuajitLogAlert(lua_State *luastate) {
+    char *ts,*hId,*srcip,*dstip,*host,*uri,*info;
+    DetectLuajitData *ld;
+    int return_val;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    ts = lua_tostring(luastate, 1);
+    if (ts == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    hId = lua_tostring(luastate, 2);
+    if (hId == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 3)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "3rd arg not a string");
+        return 2;
+    }
+    srcip = lua_tostring(luastate, 3);
+    if (srcip == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    
+    if (!lua_isstring(luastate, 4)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "4th arg not a string");
+        return 2;
+    }
+    dstip = lua_tostring(luastate, 4);
+    if (dstip == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+
+    if (!lua_isstring(luastate, 5)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "5th arg not a string");
+        return 2;
+    }
+    host = lua_tostring(luastate, 5);
+    if (host == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+
+    if (!lua_isstring(luastate, 6)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "6th arg not a string");
+        return 2;
+    }
+    uri = lua_tostring(luastate, 6);
+    if (uri == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+   if (!lua_isstring(luastate, 7)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "7th arg not a string");
+        return 2;
+    }
+    info = lua_tostring(luastate, 7);
+
+    return_val = log_alert(ts,hId,srcip,dstip,host,uri,info);
+    lua_pushnumber(luastate, (lua_Number)return_val);
+
+    return 1;
+}
+
+
+static int LuajitLogError(lua_State *luastate) {
+    char *ts,*info;
+    DetectLuajitData *ld;
+    int return_val;
+
+    /* need luajit data for id -> idx conversion */
+    lua_pushlightuserdata(luastate, (void *)&luaext_key_ld);
+    lua_gettable(luastate, LUA_REGISTRYINDEX);
+    ld = lua_touserdata(luastate, -1);
+    SCLogDebug("ld %p", ld);
+
+    if (ld == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "internal error: no ld");
+        return 2;
+    }
+
+    if (!lua_isstring(luastate, 1)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "1st arg not a string");
+        return 2;
+    }
+    ts = lua_tostring(luastate, 1);
+    if (ts == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+    
+    if (!lua_isstring(luastate, 2)) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "2nd arg not a string");
+        return 2;
+    }
+    info = lua_tostring(luastate, 2);
+    if (info == NULL) {
+        lua_pushnil(luastate);
+        lua_pushstring(luastate, "null string");
+        return 2;
+    }
+
+    return_val = log_error(ts,info);
+    lua_pushnumber(luastate, (lua_Number)return_val);
+
+    return 1;
 }
 
 
@@ -2328,6 +2487,15 @@ int LuajitRegisterExtensions(lua_State *lua_state) {
     
     lua_pushcfunction(lua_state, LuajitFreeGlobalStrvar);
     lua_setglobal(lua_state, "ScGlobalStrFree");
+
+    /**
+      * LuajitExtensions for Functions(zlog-logger)
+     */
+    lua_pushcfunction(lua_state, LuajitLogAlert);
+    lua_setglobal(lua_state, "ScLogAlert");
+
+    lua_pushcfunction(lua_state, LuajitLogError);
+    lua_setglobal(lua_state, "ScLogError");
 
 
     /**
