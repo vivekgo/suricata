@@ -1497,13 +1497,6 @@
         fi
     fi
 
-  #jansson
-    PKG_CHECK_MODULES([JANSSON], jansson,,[with_pkgconfig_jansson=no])
-    if test "$with_pkgconfig_jansson" != "no"; then
-        CPPFLAGS="${CPPFLAGS} ${JANSSON_CFLAGS}"
-        LIBS="${LIBS} ${JANSSON_LIBS}"
-    fi
-
 
   # libgeoip
     AC_ARG_ENABLE(geoip,
