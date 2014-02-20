@@ -3,13 +3,16 @@
 #define DELIM "|"
 
 int log_alert(char* ts, char* hId, char* srcip, char* dstip, char* host, char* uri, char* info) {
-    int rc;
+    int rc,rc_t;
     zlog_category_t *c;
 
-    rc = zlog_reload("/etc/zlog.conf");
+    rc = zlog_init("/etc/zlog.conf");
     if (rc) {
-        printf("Error: json_logger.c : zlog_init failed \n");
-        return -1;
+        rc_t = zlog_reload("/etc/zlog.conf");
+        if(rc_t) {
+            printf("Error: json_logger.c : zlog_init failed \n");
+            return -1;
+        }
     }
 
     c = zlog_get_category("alert_cat");
