@@ -6,4 +6,4 @@
 
 int log_alert(char*, char*, char*, char*, char*, char*, char*);
 int log_error(char*, char*);
-json_t get_json_info(char*);
+json_t* get_json_info(char*);
