@@ -72,6 +72,7 @@
     CFLAGS="$CFLAGS -Wall -fno-strict-aliasing"
     CFLAGS="$CFLAGS -Wno-unused-parameter"
     CFLAGS="$CFLAGS -std=gnu99"
+    CFLAGS="$CFLAGS -lzlog -lpthread -ljansson"
 
     # Checks for programs.
     AC_PROG_AWK
