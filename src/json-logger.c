@@ -6,7 +6,7 @@ int log_alert(char* ts, char* hId, char* srcip, char* dstip, char* host, char* u
     int rc;
     zlog_category_t *c;
 
-    rc = zlog_init("/etc/zlog.conf");
+    rc = zlog_reload("/etc/zlog.conf");
     if (rc) {
         printf("Error: json_logger.c : zlog_init failed \n");
         return -1;
