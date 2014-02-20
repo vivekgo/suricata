@@ -43,7 +43,7 @@ int log_alert(char* ts, char* hId, char* srcip, char* dstip, char* host, char* u
     return 0;
 }
 
-json_t get_json_info(char* info) {
+json_t* get_json_info(char* info) {
     json_t *json;
     char* param_str;
     char* key;
