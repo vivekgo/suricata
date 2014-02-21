@@ -319,7 +319,7 @@ int get_ipcount_from_URI_List(char* srcIp, char* uri) {
  * 
  */
 char* get_info_from_URI_List(char* srcIp, char* uri) {
-     char* return_str = NULL;
+     char* return_str;
      adhocHashMap* map = NULL;
      HASH_FIND_STR(IP_BFS,srcIp,map);
      if(!map) {
@@ -344,18 +344,18 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
              for(i=0; i<count; i++) {
                  int len_host = strlen(urimap->host[i]);
                  char tmp_buffer[2];
-                 snprintf(tmp_buffer,2,"%d",count);
+                 snprintf(tmp_buffer,2,"%d",i);
                  memcpy(return_str + j,"ip[",3);
-                 memcpy(return_str + j + 3,tmp_buffer,2);
-                 memcpy(return_str + j + 5,"]|",2);
-                 memcpy(return_str + j + 7,urimap->ip[i],7);
-                 memcpy(return_str + j + 14,"|",1);
-                 memcpy(return_str + j + 15,"host[",5);
-                 memcpy(return_str + j + 20,tmp_buffer,2);
-                 memcpy(return_str + j + 22,"]|",2);
-                 memcpy(return_str + j + 24,urimap->host[i],len_host);
-                 memcpy(return_str + j + 24 + len_host, "|", 1);
-                 j = j + 24 + len_host + 1;
+                 memcpy(return_str + j + 3,tmp_buffer[0],1);
+                 memcpy(return_str + j + 4,"]|",2);
+                 memcpy(return_str + j + 6,urimap->ip[i],7);
+                 memcpy(return_str + j + 13,"|",1);
+                 memcpy(return_str + j + 14,"host[",5);
+                 memcpy(return_str + j + 19,tmp_buffer,2);
+                 memcpy(return_str + j + 21,"]|",2);
+                 memcpy(return_str + j + 23,urimap->host[i],len_host);
+                 memcpy(return_str + j + 23 + len_host, "|", 1);
+                 j = j + 23 + len_host + 1;
                  printf("-----Return_str %s ----------\n",return_str);
              }
              return return_str;
