@@ -337,25 +337,15 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
              int i =0, j=0;
              int count = urimap->count;
              int len_str = 0;
-             for(i=0; i<count; i++)
-                 len_str += strlen(urimap->host[i]) + 9 + 14;
-             return_str = (char*)malloc(len_str*sizeof(char));
-             memset(return_str,0x00,len_str);
-             for(i=0; i<count; i++) {
-                 int len_host = strlen(urimap->host[i]);
-                 char tmp_buffer[2];
-                 snprintf(tmp_buffer,2,"%d",i);
-                 memcpy(return_str + j,"ip[",3);
-                 memcpy(return_str + j + 3,tmp_buffer[0],1);
-                 memcpy(return_str + j + 4,"]|",2);
-                 memcpy(return_str + j + 6,urimap->ip[i],7);
-                 memcpy(return_str + j + 13,"|",1);
-                 memcpy(return_str + j + 14,"host[",5);
-                 memcpy(return_str + j + 19,tmp_buffer,2);
-                 memcpy(return_str + j + 21,"]|",2);
-                 memcpy(return_str + j + 23,urimap->host[i],len_host);
-                 memcpy(return_str + j + 23 + len_host, "|", 1);
-                 j = j + 23 + len_host + 1;
+             if (count >= 1) {
+                 int len_host = strlen(urimap->host[0]);
+                 len_str = 7 + len_host + 2;
+                 return_str = (char*)malloc(len_str*sizeof(char));
+                 memset(return_str,0x00,len_str);
+                 memcpy(return_str,urimap->ip[i],7);
+                 memcpy(return_str + 7,"|",1);
+                 memcpy(return_str + 8,urimap->host[i],len_host);
+                 memcpy(return_str + 8 + len_host, "\0", 1);
                  printf("-----Return_str %s ----------\n",return_str);
              }
              return return_str;
