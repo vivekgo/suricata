@@ -342,7 +342,7 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
              return_str = (char*)malloc(len_str*sizeof(char));
              memset(return_str,0x00,len_str);
              for(i=0; i<count; i++) {
-                 int len_host = strlen(host[i]);
+                 int len_host = strlen(urimap->host[i]);
                  char tmp_buffer[2];
                  snprintf(tmp_buffer,2,"%d",count);
                  memcpy(return_str + j,"ip[",3);
