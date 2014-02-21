@@ -82,7 +82,7 @@ json_t* get_json_info(char* info) {
                 memcpy(key + param_str_len, "\0", 1);
                 flag = 1;
             }
-            param_str = strtok(NULL," ");
+            param_str = strtok(NULL,DELIM);
         }
     }
     return json;
