@@ -334,15 +334,29 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
              return NULL;
          }
          else {
-             int i;
-             int ip_count = urimap->count;
-             int len_uri = strlen(urimap->uri_key);
-             int len_str = len_uri + 7*ip_count;
+             int i =0, j=0;
+             int count = urimap->count;
+             int len_str = 0;
+             for(i=0; i<count; i++)
+                 len_str += strlen(urimap->host[i]) + 9 + 14;
              return_str = (char*)malloc(len_str*sizeof(char));
              memset(return_str,0x00,len_str);
-             for(i=0; i<ip_count; i++)
-                 memcpy(return_str + i*7,urimap->ip[i],7);
-             memcpy(return_str + ip_count*7,urimap->uri_key,len_uri);
+             for(i=0; i<count; i++) {
+                 int len_host = strlen(host[i]);
+                 char tmp_buffer[2];
+                 snprintf(tmp_buffer,2,"%d",count);
+                 memcpy(return_str + j,"ip[",3);
+                 memcpy(return_str + j + 3,tmp_buffer,2);
+                 memcpy(return_str + j + 5,"]|",2);
+                 memcpy(return_str + j + 7,urimap->ip[i],7);
+                 memcpy(return_str + j + 14,"|",1);
+                 memcpy(return_str + j + 15,"host[",5);
+                 memcpy(return_str + j + 20,tmp_buffer,2);
+                 memcpy(return_str + j + 22,"]|",2);
+                 memcpy(return_str + j + 24,urimap->host[i],len_host);
+                 memcpy(return_str + j + 24 + len_host, "|", 1);
+                 j = j + 24 + len_host + 1;
+             }
              return return_str;
          }
      }
