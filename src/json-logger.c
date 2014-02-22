@@ -111,7 +111,7 @@ int log_error(char* ts, char* info) {
             return -1;
         }
         else {
-            c = zlog_get_category("alert_cat");
+            c = zlog_get_category("error_cat");
             if (!c) {
                 printf("Error: json_logger.c : zlog_get_category failed \n");
                 zlog_fini();
@@ -120,7 +120,7 @@ int log_error(char* ts, char* info) {
         }
     }
     else {
-        c = zlog_get_category("alert_cat");
+        c = zlog_get_category("error_cat");
         if (!c) {
             printf("Error: json_logger.c : zlog_get_category failed \n");
             zlog_fini();

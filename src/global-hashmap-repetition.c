@@ -344,7 +344,6 @@ char* get_info_from_URI_List(char* srcIp, char* uri) {
                  memset(return_str,0x00,len_str);
                  memcpy(return_str,urimap->ip[i],7);
                  memcpy(return_str + 7,urimap->host[i],len_host);
-                 printf("-----Return_str %s ----------\n",return_str);
              }
              return return_str;
          }
